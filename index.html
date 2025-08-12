@@ -18,6 +18,26 @@
             --border-color: #e9ecef;
             --sent-message: #6c5ce7;
             --received-message: #ffffff;
+            --message-hover: #f5f5f5;
+            --modal-bg: #ffffff;
+            --input-bg: #ffffff;
+            --sidebar-bg: #f8f9fa;
+            --header-bg: #ffffff;
+        }
+        
+        /* Темная тема */
+        body.dark-theme {
+            --bg-color: #1e1e1e;
+            --text-color: #f0f0f0;
+            --text-light: #b0b0b0;
+            --border-color: #444444;
+            --sent-message: #5a4fcf;
+            --received-message: #2d2d2d;
+            --message-hover: #333333;
+            --modal-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --sidebar-bg: #1e1e1e;
+            --header-bg: #2d2d2d;
         }
         
         * {
@@ -32,15 +52,17 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             height: 100vh;
             color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
         
         .container {
             width: 100%;
             height: 100vh;
-            background: white;
+            background: var(--bg-color);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: background-color 0.3s;
         }
         
         /* Мобильное меню */
@@ -74,7 +96,7 @@
         
         .sidebar {
             width: 280px;
-            background: var(--bg-color);
+            background: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -95,6 +117,14 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-emoji {
+            font-size: 1.5rem;
+            margin-right: 5px;
         }
         
         .user-profile p {
@@ -136,7 +166,8 @@
             border-radius: 20px;
             font-size: 0.9rem;
             outline: none;
-            background: white;
+            background: var(--input-bg);
+            color: var(--text-color);
         }
         
         .search-results {
@@ -155,7 +186,7 @@
         }
         
         .user-item:active {
-            background: var(--border-color);
+            background: var(--message-hover);
         }
         
         .user-avatar {
@@ -183,6 +214,13 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-emoji-small {
+            font-size: 1rem;
+            margin-right: 5px;
         }
         
         .user-info p {
@@ -224,7 +262,7 @@
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            background: white;
+            background: var(--header-bg);
             z-index: 10;
         }
         
@@ -235,6 +273,8 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
         }
         
         .back-btn {
@@ -244,6 +284,7 @@
             margin-right: 10px;
             display: none;
             cursor: pointer;
+            color: var(--text-color);
         }
         
         .chat-messages {
@@ -258,6 +299,7 @@
             margin-bottom: 12px;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         
         .message.sent {
@@ -296,11 +338,33 @@
             margin-top: 4px;
         }
         
+        .message-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+        
+        .message-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px;
+            margin-left: 5px;
+        }
+        
         .message-input {
             padding: 12px 15px;
             border-top: 1px solid var(--border-color);
             display: flex;
-            background: white;
+            background: var(--header-bg);
         }
         
         .message-input input {
@@ -310,6 +374,8 @@
             border-radius: 20px;
             font-size: 0.95rem;
             outline: none;
+            background: var(--input-bg);
+            color: var(--text-color);
         }
         
         .message-input button {
@@ -443,13 +509,14 @@
         }
         
         .modal-content {
-            background: white;
+            background: var(--modal-bg);
             padding: 20px;
             border-radius: 10px;
             width: 90%;
             max-width: 400px;
             transform: translateY(20px);
             transition: transform 0.3s ease;
+            color: var(--text-color);
         }
         
         .modal.active .modal-content {
@@ -469,6 +536,8 @@
             border-radius: 5px;
             margin-bottom: 15px;
             font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-color);
         }
         
         .modal-actions {
@@ -493,6 +562,51 @@
         .modal-btn-secondary {
             background: var(--border-color);
             color: var(--text-color);
+        }
+        
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .theme-toggle label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .theme-toggle input {
+            margin-right: 10px;
+        }
+        
+        .emoji-selector {
+            margin-bottom: 15px;
+        }
+        
+        .emoji-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .emoji-option {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .emoji-option:hover {
+            background: var(--message-hover);
+        }
+        
+        .emoji-option.selected {
+            background: var(--primary-color);
+            color: white;
         }
         
         /* Адаптация для мобильных */
@@ -576,7 +690,10 @@
         <div class="content-wrapper">
             <div class="sidebar" id="sidebar">
                 <div class="user-profile">
-                    <h2 id="current-user">Загрузка...</h2>
+                    <h2 id="current-user">
+                        <span class="user-emoji" id="user-emoji">😊</span>
+                        <span>Загрузка...</span>
+                    </h2>
                     <p>Онлайн</p>
                 </div>
                 
@@ -611,7 +728,10 @@
                 <div class="chat-header" id="chat-header" style="display: none;">
                     <button class="back-btn" id="back-btn">←</button>
                     <div class="user-avatar" id="chat-avatar">?</div>
-                    <h2 id="chat-user-name">Пользователь</h2>
+                    <h2 id="chat-user-name">
+                        <span class="user-emoji-small" id="chat-user-emoji">😊</span>
+                        <span>Пользователь</span>
+                    </h2>
                 </div>
                 
                 <div class="chat-messages" id="chat-messages" style="display: none;">
@@ -637,10 +757,44 @@
     <div class="modal" id="settings-modal">
         <div class="modal-content">
             <h2 class="modal-title">Настройки</h2>
+            
+            <div class="theme-toggle">
+                <label>
+                    <input type="checkbox" id="theme-toggle">
+                    <span>Темная тема</span>
+                </label>
+            </div>
+            
+            <div class="emoji-selector">
+                <label>Ваш статус:</label>
+                <div class="emoji-options" id="emoji-options">
+                    <span class="emoji-option" data-emoji="😊">😊</span>
+                    <span class="emoji-option" data-emoji="😎">😎</span>
+                    <span class="emoji-option" data-emoji="🤔">🤔</span>
+                    <span class="emoji-option" data-emoji="😴">😴</span>
+                    <span class="emoji-option" data-emoji="😢">😢</span>
+                    <span class="emoji-option" data-emoji="😡">😡</span>
+                    <span class="emoji-option" data-emoji="🥳">🥳</span>
+                    <span class="emoji-option" data-emoji="😍">😍</span>
+                </div>
+            </div>
+            
             <input type="text" class="modal-input" id="new-username-input" placeholder="Новый никнейм">
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-secondary" id="cancel-settings-btn">Отмена</button>
                 <button class="modal-btn modal-btn-primary" id="save-settings-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно редактирования сообщения -->
+    <div class="modal" id="edit-message-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Редактирование сообщения</h2>
+            <textarea class="modal-input" id="edit-message-text" rows="3" placeholder="Текст сообщения"></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-edit-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-edit-btn">Сохранить</button>
             </div>
         </div>
     </div>
@@ -651,12 +805,14 @@
         
         // Элементы DOM
         const currentUserEl = document.getElementById('current-user');
+        const userEmojiEl = document.getElementById('user-emoji');
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
         const emptyState = document.getElementById('empty-state');
         const chatHeader = document.getElementById('chat-header');
         const chatAvatar = document.getElementById('chat-avatar');
         const chatUserName = document.getElementById('chat-user-name');
+        const chatUserEmoji = document.getElementById('chat-user-emoji');
         const chatMessages = document.getElementById('chat-messages');
         const messageInputContainer = document.getElementById('message-input-container');
         const messageText = document.getElementById('message-text');
@@ -674,12 +830,20 @@
         const saveSettingsBtn = document.getElementById('save-settings-btn');
         const chatsTab = document.getElementById('chats-tab');
         const usersTab = document.getElementById('users-tab');
+        const themeToggle = document.getElementById('theme-toggle');
+        const emojiOptions = document.getElementById('emoji-options');
+        const editMessageModal = document.getElementById('edit-message-modal');
+        const editMessageText = document.getElementById('edit-message-text');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const saveEditBtn = document.getElementById('save-edit-btn');
         
         // Состояние приложения
         let currentUser = null;
         let currentChat = null;
         let messageListeners = {};
         let activeTab = 'chats'; // 'chats' или 'users'
+        let userEmoji = '😊';
+        let editingMessageId = null;
         
         // Инициализация
         document.addEventListener('DOMContentLoaded', initApp);
@@ -687,11 +851,21 @@
         async function initApp() {
             setupEventListeners();
             
+            // Проверяем сохраненную тему
+            if (localStorage.getItem('dark_theme') === 'true') {
+                document.body.classList.add('dark-theme');
+                themeToggle.checked = true;
+            }
+            
             // Проверяем, есть ли сохраненный пользователь
             const savedUser = localStorage.getItem('messenger_user');
             if (savedUser) {
                 currentUser = savedUser;
-                currentUserEl.textContent = currentUser;
+                
+                // Загружаем данные пользователя
+                await loadUserData();
+                
+                currentUserEl.querySelector('span:last-child').textContent = currentUser;
                 await updateUserStatus(true);
                 loadRecentChats();
             } else {
@@ -722,6 +896,24 @@
             settingsBtn.addEventListener('click', openSettings);
             cancelSettingsBtn.addEventListener('click', closeSettings);
             saveSettingsBtn.addEventListener('click', saveSettings);
+            
+            // Переключение темы
+            themeToggle.addEventListener('change', toggleTheme);
+            
+            // Выбор эмодзи
+            emojiOptions.addEventListener('click', (e) => {
+                if (e.target.classList.contains('emoji-option')) {
+                    document.querySelectorAll('.emoji-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    e.target.classList.add('selected');
+                    userEmoji = e.target.dataset.emoji;
+                }
+            });
+            
+            // Редактирование сообщения
+            cancelEditBtn.addEventListener('click', closeEditMessage);
+            saveEditBtn.addEventListener('click', saveEditedMessage);
             
             // Мобильное меню
             menuBtn.addEventListener('click', toggleSidebar);
@@ -768,9 +960,29 @@
             }
         }
         
+        // Переключение темы
+        function toggleTheme() {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('dark_theme', 'true');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('dark_theme', 'false');
+            }
+        }
+        
         // Открытие настроек
         function openSettings() {
             newUsernameInput.value = currentUser || '';
+            
+            // Устанавливаем текущий эмодзи
+            document.querySelectorAll('.emoji-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.emoji === userEmoji) {
+                    opt.classList.add('selected');
+                }
+            });
+            
             settingsModal.classList.add('active');
         }
         
@@ -788,47 +1000,62 @@
                 return;
             }
             
-            if (newUsername === currentUser) {
-                showNotification('Это ваш текущий никнейм');
+            if (newUsername === currentUser && userEmoji === userEmojiEl.textContent) {
+                showNotification('Изменений нет');
                 closeSettings();
                 return;
             }
             
             try {
-                // Проверяем, существует ли уже пользователь с таким именем
-                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`);
-                if (!response.ok) throw new Error('Ошибка проверки имени');
-                
-                const userExists = await response.json();
-                if (userExists) {
-                    showNotification('Этот никнейм уже занят');
-                    return;
+                // Если никнейм изменился
+                if (newUsername !== currentUser) {
+                    // Проверяем, существует ли уже пользователь с таким именем
+                    const response = await fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`);
+                    if (!response.ok) throw new Error('Ошибка проверки имени');
+                    
+                    const userExists = await response.json();
+                    if (userExists) {
+                        showNotification('Этот никнейм уже занят');
+                        return;
+                    }
+                    
+                    // Обновляем данные пользователя в Firebase
+                    await Promise.all([
+                        // Удаляем старые данные пользователя
+                        fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                            method: 'DELETE'
+                        }),
+                        
+                        // Создаем новые данные пользователя
+                        fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                nickname: newUsername,
+                                emoji: userEmoji,
+                                online: true,
+                                lastSeen: Date.now()
+                            })
+                        })
+                    ]);
+                    
+                    // Обновляем текущего пользователя
+                    localStorage.setItem('messenger_user', newUsername);
+                    currentUser = newUsername;
+                    currentUserEl.querySelector('span:last-child').textContent = newUsername;
+                } else {
+                    // Если изменился только эмодзи
+                    await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            emoji: userEmoji
+                        })
+                    });
                 }
                 
-                // Обновляем данные пользователя в Firebase
-                await Promise.all([
-                    // Удаляем старые данные пользователя
-                    fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
-                        method: 'DELETE'
-                    }),
-                    
-                    // Создаем новые данные пользователя
-                    fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`, {
-                        method: 'PUT',
-                        body: JSON.stringify({
-                            nickname: newUsername,
-                            online: true,
-                            lastSeen: Date.now()
-                        })
-                    })
-                ]);
+                // Обновляем эмодзи в интерфейсе
+                userEmojiEl.textContent = userEmoji;
                 
-                // Обновляем текущего пользователя
-                localStorage.setItem('messenger_user', newUsername);
-                currentUser = newUsername;
-                currentUserEl.textContent = newUsername;
-                
-                showNotification('Никнейм успешно изменен');
+                showNotification('Настройки сохранены');
                 closeSettings();
                 
                 // Обновляем список чатов или пользователей в зависимости от активной вкладки
@@ -871,6 +1098,19 @@
                 <input type="text" id="username-input" 
                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px;"
                        placeholder="Ваш никнейм">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">Выберите статус:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <span class="emoji-option" data-emoji="😊" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😊</span>
+                        <span class="emoji-option" data-emoji="😎" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😎</span>
+                        <span class="emoji-option" data-emoji="🤔" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">🤔</span>
+                        <span class="emoji-option" data-emoji="😴" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😴</span>
+                        <span class="emoji-option" data-emoji="😢" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😢</span>
+                        <span class="emoji-option" data-emoji="😡" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😡</span>
+                        <span class="emoji-option" data-emoji="🥳" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">🥳</span>
+                        <span class="emoji-option" data-emoji="😍" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😍</span>
+                    </div>
+                </div>
                 <button id="submit-username" 
                         style="width: 100%; padding: 12px; background: #6c5ce7; color: white; border: none; border-radius: 5px;">
                     Продолжить
@@ -882,6 +1122,20 @@
             
             const usernameInput = document.getElementById('username-input');
             const submitBtn = document.getElementById('submit-username');
+            const emojiOptions = modalContent.querySelectorAll('.emoji-option');
+            
+            // Устанавливаем эмодзи по умолчанию
+            emojiOptions[0].classList.add('selected');
+            userEmoji = emojiOptions[0].dataset.emoji;
+            
+            // Обработка выбора эмодзи
+            emojiOptions.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    emojiOptions.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    userEmoji = opt.dataset.emoji;
+                });
+            });
             
             // Фокус на поле ввода
             usernameInput.focus();
@@ -902,10 +1156,11 @@
                     
                     currentUser = username;
                     localStorage.setItem('messenger_user', username);
-                    currentUserEl.textContent = username;
+                    currentUserEl.querySelector('span:last-child').textContent = username;
+                    userEmojiEl.textContent = userEmoji;
                     
                     // Добавляем пользователя в Firebase
-                    await addUserToFirebase(username);
+                    await addUserToFirebase(username, userEmoji);
                     await updateUserStatus(true);
                     
                     // Загружаем последние чаты
@@ -927,13 +1182,30 @@
             });
         }
         
+        // Загрузка данных пользователя
+        async function loadUserData() {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных пользователя');
+                
+                const userData = await response.json();
+                if (userData && userData.emoji) {
+                    userEmoji = userData.emoji;
+                    userEmojiEl.textContent = userEmoji;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки данных пользователя:', error);
+            }
+        }
+        
         // Добавление/обновление пользователя в Firebase
-        async function addUserToFirebase(username) {
+        async function addUserToFirebase(username, emoji) {
             try {
                 const response = await fetch(`${firebaseURL}users/${encodeURIComponent(username)}.json`, {
                     method: 'PUT',
                     body: JSON.stringify({
                         nickname: username,
+                        emoji: emoji,
                         online: true,
                         lastSeen: Date.now()
                     })
@@ -1028,7 +1300,7 @@
                     .then(response => response.json())
                     .then(userData => ({
                         ...chat,
-                        userData: userData || { nickname: chat.user, online: false }
+                        userData: userData || { nickname: chat.user, online: false, emoji: '😊' }
                     }))
             );
             
@@ -1050,7 +1322,10 @@
                 userItem.innerHTML = `
                     <div class="user-avatar">${chat.userData.nickname.charAt(0).toUpperCase()}</div>
                     <div class="user-info">
-                        <h3>${chat.userData.nickname}</h3>
+                        <h3>
+                            <span class="user-emoji-small">${chat.userData.emoji || '😊'}</span>
+                            <span>${chat.userData.nickname}</span>
+                        </h3>
                         <div class="chat-preview">
                             <div class="last-message">${escapeHtml(lastMessageText)}</div>
                             <div class="last-time">${formatLastSeen(chat.timestamp)}</div>
@@ -1058,7 +1333,7 @@
                     </div>
                 `;
                 
-                userItem.addEventListener('click', () => openChat(chat.userData.nickname));
+                userItem.addEventListener('click', () => openChat(chat.userData.nickname, chat.userData.emoji || '😊'));
                 searchResults.appendChild(userItem);
             });
         }
@@ -1094,12 +1369,15 @@
                     userItem.innerHTML = `
                         <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
                         <div class="user-info">
-                            <h3>${user.nickname}</h3>
+                            <h3>
+                                <span class="user-emoji-small">${user.emoji || '😊'}</span>
+                                <span>${user.nickname}</span>
+                            </h3>
                             <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
                         </div>
                     `;
                     
-                    userItem.addEventListener('click', () => openChat(user.nickname));
+                    userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
                     searchResults.appendChild(userItem);
                 }
             });
@@ -1158,12 +1436,15 @@
                         userItem.innerHTML = `
                             <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
                             <div class="user-info">
-                                <h3>${user.nickname}</h3>
+                                <h3>
+                                    <span class="user-emoji-small">${user.emoji || '😊'}</span>
+                                    <span>${user.nickname}</span>
+                                </h3>
                                 <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
                             </div>
                         `;
                         
-                        userItem.addEventListener('click', () => openChat(user.nickname));
+                        userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
                         searchResults.appendChild(userItem);
                     }
                 });
@@ -1173,7 +1454,7 @@
         }
         
         // Открытие чата
-        function openChat(username) {
+        function openChat(username, emoji = '😊') {
             // Закрываем сайдбар на мобильных
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('active');
@@ -1191,9 +1472,10 @@
             chatMessages.style.display = 'block';
             messageInputContainer.style.display = 'flex';
             
-            // Проверяем, что username существует перед использованием charAt
-            chatAvatar.textContent = username && username.length > 0 ? username.charAt(0).toUpperCase() : '?';
-            chatUserName.textContent = username || 'Пользователь';
+            // Обновляем эмодзи и имя собеседника
+            chatUserEmoji.textContent = emoji;
+            chatUserName.querySelector('span:last-child').textContent = username;
+            chatAvatar.textContent = username.charAt(0).toUpperCase();
             
             loadMessages();
             
@@ -1278,7 +1560,7 @@
                 if (dateString !== lastDate) {
                     messagesHTML += `
                         <div style="text-align: center; margin: 15px 0;">
-                            <span style="background: #f0f0f0; padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
+                            <span style="background: var(--message-hover); padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
                                 ${dateString}
                             </span>
                         </div>
@@ -1288,10 +1570,19 @@
                 
                 const timeString = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
+                // Добавляем кнопки действий для сообщений текущего пользователя
+                const actionsHTML = message.sender === currentUser ? `
+                    <div class="message-actions">
+                        <button class="message-action-btn" onclick="editMessage('${message.id}', '${escapeHtml(message.text)}')">✏️</button>
+                        <button class="message-action-btn" onclick="deleteMessage('${message.id}')">🗑️</button>
+                    </div>
+                ` : '';
+                
                 messagesHTML += `
                     <div class="message ${message.sender === currentUser ? 'sent' : 'received'}">
                         <div class="message-content">${escapeHtml(message.text)}</div>
                         <div class="message-time">${timeString}</div>
+                        ${actionsHTML}
                     </div>
                 `;
             });
@@ -1366,6 +1657,90 @@
         // Генерация ID чата
         function getChatId(user1, user2) {
             return [user1, user2].sort().join('_');
+        }
+        
+        // Редактирование сообщения
+        function editMessage(messageId, text) {
+            editingMessageId = messageId;
+            editMessageText.value = unescapeHtml(text);
+            editMessageModal.classList.add('active');
+        }
+        
+        // Закрытие редактирования сообщения
+        function closeEditMessage() {
+            editMessageModal.classList.remove('active');
+            editingMessageId = null;
+        }
+        
+        // Сохранение отредактированного сообщения
+        async function saveEditedMessage() {
+            if (!editingMessageId || !currentChat) return;
+            
+            const newText = editMessageText.value.trim();
+            if (!newText) {
+                showNotification('Сообщение не может быть пустым');
+                return;
+            }
+            
+            try {
+                const chatId = getChatId(currentUser, currentChat);
+                const response = await fetch(`${firebaseURL}messages/${chatId}/${editingMessageId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        text: newText,
+                        edited: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при редактировании сообщения');
+                
+                closeEditMessage();
+                loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+                
+                showNotification('Сообщение отредактировано');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        // Удаление сообщения
+        async function deleteMessage(messageId) {
+            if (!confirm('Вы уверены, что хотите удалить это сообщение?')) return;
+            
+            try {
+                const chatId = getChatId(currentUser, currentChat);
+                const response = await fetch(`${firebaseURL}messages/${chatId}/${messageId}.json`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при удалении сообщения');
+                
+                loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+                
+                showNotification('Сообщение удалено');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        // Обратное преобразование HTML
+        function unescapeHtml(safe) {
+            return safe
+                .replace(/&amp;/g, "&")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&quot;/g, "\"")
+                .replace(/&#039;/g, "'");
         }
         
         // Выход из системы
