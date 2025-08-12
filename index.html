@@ -102,6 +102,28 @@
             opacity: 0.9;
         }
         
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
         .search-container {
             padding: 10px;
             border-bottom: 1px solid var(--border-color);
@@ -152,6 +174,7 @@
         
         .user-info {
             overflow: hidden;
+            flex: 1;
         }
         
         .user-info h3 {
@@ -165,6 +188,28 @@
         .user-info p {
             font-size: 0.8rem;
             color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-preview {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-preview .last-message {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-preview .last-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            align-self: flex-end;
         }
         
         .chat-area {
@@ -535,8 +580,13 @@
                     <p>Онлайн</p>
                 </div>
                 
+                <div class="tabs">
+                    <button class="tab active" id="chats-tab">Чаты</button>
+                    <button class="tab" id="users-tab">Пользователи</button>
+                </div>
+                
                 <div class="search-container">
-                    <input type="text" class="search-box" id="search-input" placeholder="Поиск пользователей...">
+                    <input type="text" class="search-box" id="search-input" placeholder="Поиск...">
                 </div>
                 
                 <div class="search-results" id="search-results">
@@ -622,11 +672,14 @@
         const newUsernameInput = document.getElementById('new-username-input');
         const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
         const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const chatsTab = document.getElementById('chats-tab');
+        const usersTab = document.getElementById('users-tab');
         
         // Состояние приложения
         let currentUser = null;
         let currentChat = null;
         let messageListeners = {};
+        let activeTab = 'chats'; // 'chats' или 'users'
         
         // Инициализация
         document.addEventListener('DOMContentLoaded', initApp);
@@ -640,7 +693,7 @@
                 currentUser = savedUser;
                 currentUserEl.textContent = currentUser;
                 await updateUserStatus(true);
-                loadUsers();
+                loadRecentChats();
             } else {
                 // Если пользователя нет, запрашиваем никнейм
                 requestUsername();
@@ -684,6 +737,10 @@
             
             // Обработка изменения размера экрана
             window.addEventListener('resize', handleResize);
+            
+            // Переключение вкладок
+            chatsTab.addEventListener('click', () => switchTab('chats'));
+            usersTab.addEventListener('click', () => switchTab('users'));
         }
         
         function toggleSidebar() {
@@ -693,6 +750,21 @@
         function handleResize() {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
+            }
+        }
+        
+        // Переключение вкладок
+        function switchTab(tab) {
+            activeTab = tab;
+            
+            if (tab === 'chats') {
+                chatsTab.classList.add('active');
+                usersTab.classList.remove('active');
+                loadRecentChats();
+            } else {
+                usersTab.classList.add('active');
+                chatsTab.classList.remove('active');
+                loadUsers();
             }
         }
         
@@ -758,7 +830,13 @@
                 
                 showNotification('Никнейм успешно изменен');
                 closeSettings();
-                loadUsers();
+                
+                // Обновляем список чатов или пользователей в зависимости от активной вкладки
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                } else {
+                    loadUsers();
+                }
                 
             } catch (error) {
                 showNotification('Ошибка: ' + error.message);
@@ -829,7 +907,9 @@
                     // Добавляем пользователя в Firebase
                     await addUserToFirebase(username);
                     await updateUserStatus(true);
-                    loadUsers();
+                    
+                    // Загружаем последние чаты
+                    loadRecentChats();
                     
                     document.body.removeChild(modal);
                 } else {
@@ -880,6 +960,107 @@
             } catch (error) {
                 console.error('Ошибка обновления статуса:', error);
             }
+        }
+        
+        // Загрузка последних чатов
+        async function loadRecentChats() {
+            try {
+                // Получаем все чаты, в которых участвует текущий пользователь
+                const response = await fetch(`${firebaseURL}messages.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке чатов');
+                
+                const allChats = await response.json();
+                const recentChats = [];
+                
+                if (allChats) {
+                    Object.keys(allChats).forEach(chatId => {
+                        // Проверяем, что текущий пользователь участвует в чате
+                        if (chatId.includes(currentUser)) {
+                            const messages = allChats[chatId];
+                            
+                            // Преобразуем сообщения в массив
+                            const messagesArray = Object.keys(messages).map(key => ({
+                                id: key,
+                                ...messages[key]
+                            }));
+                            
+                            // Находим последнее сообщение
+                            const lastMessage = messagesArray
+                                .filter(msg => msg.text && msg.sender && msg.timestamp)
+                                .sort((a, b) => b.timestamp - a.timestamp)[0];
+                            
+                            if (lastMessage) {
+                                // Определяем собеседника
+                                const otherUser = chatId.replace(currentUser, '').replace('_', '');
+                                
+                                recentChats.push({
+                                    user: otherUser,
+                                    lastMessage: lastMessage.text,
+                                    timestamp: lastMessage.timestamp,
+                                    sender: lastMessage.sender
+                                });
+                            }
+                        }
+                    });
+                    
+                    // Сортируем чаты по времени последнего сообщения
+                    recentChats.sort((a, b) => b.timestamp - a.timestamp);
+                }
+                
+                displayRecentChats(recentChats);
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        // Отображение последних чатов
+        async function displayRecentChats(chats) {
+            searchResults.innerHTML = '';
+            
+            if (chats.length === 0) {
+                searchResults.innerHTML = '<div class="user-item">У вас пока нет чатов</div>';
+                return;
+            }
+            
+            // Получаем информацию о пользователях
+            const usersPromises = chats.map(chat => 
+                fetch(`${firebaseURL}users/${encodeURIComponent(chat.user)}.json`)
+                    .then(response => response.json())
+                    .then(userData => ({
+                        ...chat,
+                        userData: userData || { nickname: chat.user, online: false }
+                    }))
+            );
+            
+            const chatsWithUserData = await Promise.all(usersPromises);
+            
+            chatsWithUserData.forEach(chat => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const messageDate = new Date(chat.timestamp);
+                const timeString = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Определяем текст последнего сообщения
+                let lastMessageText = chat.lastMessage;
+                if (chat.sender === currentUser) {
+                    lastMessageText = `Вы: ${lastMessageText}`;
+                }
+                
+                userItem.innerHTML = `
+                    <div class="user-avatar">${chat.userData.nickname.charAt(0).toUpperCase()}</div>
+                    <div class="user-info">
+                        <h3>${chat.userData.nickname}</h3>
+                        <div class="chat-preview">
+                            <div class="last-message">${escapeHtml(lastMessageText)}</div>
+                            <div class="last-time">${formatLastSeen(chat.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+                
+                userItem.addEventListener('click', () => openChat(chat.userData.nickname));
+                searchResults.appendChild(userItem);
+            });
         }
         
         // Загрузка пользователей
@@ -947,7 +1128,12 @@
             const query = searchInput.value.toLowerCase().trim();
             
             if (query === '') {
-                loadUsers();
+                // Если поиск пустой, загружаем контент в зависимости от активной вкладки
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                } else {
+                    loadUsers();
+                }
                 return;
             }
             
@@ -1164,6 +1350,11 @@
                 
                 // Обновляем сообщения и прокручиваем вниз
                 loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
                 
                 // Фокус на поле ввода
                 messageText.focus();
