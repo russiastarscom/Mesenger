@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height">
     <title>Мессенджер</title>
     <style>
-        /* Стили остаются без изменений */
         :root {
             --primary-color: #6c5ce7;
             --primary-dark: #5a4fcf;
@@ -26,6 +25,8 @@
             --header-bg: #ffffff;
             --online-color: #2ecc71;
             --offline-color: #e74c3c;
+            --notification-bg: #6c5ce7;
+            --notification-text: #ffffff;
         }
         
         /* Темная тема */
@@ -41,6 +42,8 @@
             --input-bg: #2d2d2d;
             --sidebar-bg: #1e1e1e;
             --header-bg: #2d2d2d;
+            --notification-bg: #5a4fcf;
+            --notification-text: #f0f0f0;
         }
         
         * {
@@ -509,8 +512,8 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: var(--primary-color);
-            color: white;
+            background: var(--notification-bg);
+            color: var(--notification-text);
             padding: 12px 20px;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -1104,6 +1107,8 @@
         let blockedUsers = [];
         let groups = [];
         let currentGroup = null;
+        let lastMessageTimestamp = 0;
+        let notificationSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
         
         // Инициализация
         document.addEventListener('DOMContentLoaded', initApp);
@@ -1131,6 +1136,9 @@
                 await updateUserStatus(true);
                 loadRecentChats();
                 loadGroups();
+                
+                // Запускаем проверку новых сообщений и уведомлений
+                startBackgroundChecks();
             } else {
                 // Если пользователя нет, запрашиваем никнейм
                 requestUsername();
@@ -1228,11 +1236,13 @@
             window.addEventListener('online', () => {
                 isOnline = true;
                 updateConnectionStatus();
+                showNotification('Вы в сети');
             });
             
             window.addEventListener('offline', () => {
                 isOnline = false;
                 updateConnectionStatus();
+                showNotification('Вы в оффлайн режиме');
             });
         }
         
@@ -1248,6 +1258,111 @@
                 connectionStatus.classList.add('offline');
                 document.querySelector('.user-profile p').innerHTML = 'Офлайн <span class="connection-status offline" id="connection-status"></span>';
             }
+        }
+        
+        function startBackgroundChecks() {
+            // Проверка новых сообщений каждые 5 секунд
+            setInterval(checkForNewMessages, 5000);
+            
+            // Проверка уведомлений о добавлении в группу каждые 10 секунд
+            setInterval(checkForGroupInvites, 10000);
+        }
+        
+        async function checkForNewMessages() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все чаты пользователя
+                const response = await fetch(`${firebaseURL}messages.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке новых сообщений');
+                
+                const allChats = await response.json();
+                if (!allChats) return;
+                
+                // Проверяем каждый чат, где участвует текущий пользователь
+                Object.keys(allChats).forEach(chatId => {
+                    // Проверяем, что это чат текущего пользователя (личный или групповой)
+                    if (chatId.includes(currentUser) || (chatId.startsWith('group_') && groups.some(g => g.id === chatId))) {
+                        const messages = allChats[chatId];
+                        const messagesArray = Object.keys(messages).map(key => ({
+                            id: key,
+                            ...messages[key]
+                        }));
+                        
+                        // Находим самое новое сообщение в чате
+                        const latestMessage = messagesArray
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
+                            latestMessage.sender !== currentUser && document.hidden) {
+                            
+                            // Определяем имя отправителя
+                            let senderName = latestMessage.sender;
+                            if (chatId.startsWith('group_')) {
+                                const group = groups.find(g => g.id === chatId);
+                                if (group) {
+                                    senderName = `${group.name}: ${latestMessage.sender}`;
+                                }
+                            }
+                            
+                            // Показываем уведомление
+                            showNotification(`Новое сообщение от ${senderName}: ${truncate(latestMessage.text, 30)}`);
+                            playNotificationSound();
+                            
+                            // Обновляем время последнего сообщения
+                            lastMessageTimestamp = latestMessage.timestamp;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке новых сообщений:', error);
+            }
+        }
+        
+        async function checkForGroupInvites() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все группы
+                const response = await fetch(`${firebaseURL}groups.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке приглашений в группы');
+                
+                const allGroups = await response.json();
+                if (!allGroups) return;
+                
+                // Проверяем каждую группу
+                Object.keys(allGroups).forEach(groupId => {
+                    const group = allGroups[groupId];
+                    
+                    // Проверяем, добавлен ли пользователь в группу и не знает ли он об этом
+                    if (group.participants && group.participants.includes(currentUser) && 
+                        !groups.some(g => g.id === groupId) && document.hidden) {
+                        
+                        // Показываем уведомление
+                        showNotification(`Вас добавили в группу "${group.name}"`);
+                        playNotificationSound();
+                        
+                        // Обновляем список групп
+                        loadGroups();
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке приглашений в группы:', error);
+            }
+        }
+        
+        function playNotificationSound() {
+            try {
+                notificationSound.currentTime = 0;
+                notificationSound.play();
+            } catch (error) {
+                console.error('Ошибка воспроизведения звука уведомления:', error);
+            }
+        }
+        
+        function truncate(text, length) {
+            return text.length > length ? text.substring(0, length) + '...' : text;
         }
         
         function toggleSidebar() {
@@ -1594,6 +1709,27 @@
                 
                 // Открываем чат группы
                 openGroupChat(groupId, groupName);
+                
+                // Отправляем уведомления участникам
+                participants.forEach(async participant => {
+                    if (participant !== currentUser) {
+                        try {
+                            await fetch(`${firebaseURL}users/${encodeURIComponent(participant)}/notifications.json`, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    type: 'group_invite',
+                                    groupId: groupId,
+                                    groupName: groupName,
+                                    from: currentUser,
+                                    timestamp: Date.now(),
+                                    read: false
+                                })
+                            });
+                        } catch (error) {
+                            console.error(`Ошибка отправки уведомления пользователю ${participant}:`, error);
+                        }
+                    }
+                });
             } catch (error) {
                 showNotification('Ошибка: ' + error.message);
             }
@@ -1711,9 +1847,62 @@
                     }
                 });
                 
+                // Добавляем обработчики для кнопок удаления участников
+                document.querySelectorAll('.remove-participant-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const username = btn.dataset.username;
+                        removeParticipant(username);
+                    });
+                });
+                
                 groupSettingsModal.classList.add('active');
             } catch (error) {
                 showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function removeParticipant(username) {
+            if (!currentGroup || currentGroup.admin !== currentUser) return;
+            
+            if (confirm(`Вы уверены, что хотите удалить ${username} из группы?`)) {
+                try {
+                    const updatedParticipants = currentGroup.participants.filter(p => p !== username);
+                    
+                    await fetch(`${firebaseURL}groups/${currentGroup.id}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            participants: updatedParticipants
+                        })
+                    });
+                    
+                    // Обновляем текущую группу
+                    currentGroup.participants = updatedParticipants;
+                    
+                    // Показываем уведомление
+                    showNotification(`Пользователь ${username} удален из группы`);
+                    
+                    // Обновляем список участников
+                    openGroupSettings();
+                    
+                    // Отправляем уведомление удаленному пользователю
+                    try {
+                        await fetch(`${firebaseURL}users/${encodeURIComponent(username)}/notifications.json`, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                type: 'group_remove',
+                                groupId: currentGroup.id,
+                                groupName: currentGroup.name,
+                                from: currentUser,
+                                timestamp: Date.now(),
+                                read: false
+                            })
+                        });
+                    } catch (error) {
+                        console.error(`Ошибка отправки уведомления пользователю ${username}:`, error);
+                    }
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
             }
         }
         
@@ -1959,6 +2148,9 @@
                     loadGroups();
                     
                     document.body.removeChild(modal);
+                    
+                    // Запускаем проверку новых сообщений и уведомлений
+                    startBackgroundChecks();
                 } else {
                     showNotification('Пожалуйста, введите никнейм');
                 }
@@ -2529,10 +2721,17 @@
                 }
             });
             
-            // Сортируем сообщения по времени
+            // Сортируем сообщения по времени с учетом ID для сообщений с одинаковым timestamp
             const sortedMessages = filteredMessages
                 .filter(msg => msg.text && msg.sender && msg.timestamp) // Фильтруем неполные сообщения
-                .sort((a, b) => a.timestamp - b.timestamp);
+                .sort((a, b) => {
+                    // Сначала сортируем по timestamp
+                    if (a.timestamp !== b.timestamp) {
+                        return a.timestamp - b.timestamp;
+                    }
+                    // Если timestamp одинаковые, сортируем по ID
+                    return a.id.localeCompare(b.id);
+                });
             
             // Если сообщений нет, добавляем заглушку
             if (sortedMessages.length === 0) {
@@ -2660,6 +2859,9 @@
                 
                 // Фокус на поле ввода
                 messageText.focus();
+                
+                // Обновляем время последнего сообщения
+                lastMessageTimestamp = message.timestamp;
             } catch (error) {
                 showNotification('Ошибка: ' + error.message);
             }
