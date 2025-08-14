@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height">
-    <title>Twin</title>
+    <title>Мессенджер</title>
     <style>
         :root {
             --primary-color: #6c5ce7;
@@ -605,6 +605,12 @@
         .settings {
             padding: 12px;
             border-top: 1px solid var(--border-color);
+            position: sticky;
+            bottom: 0;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         
         .settings-btn {
@@ -617,7 +623,6 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 0.9rem;
-            margin-bottom: 8px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -633,7 +638,6 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 0.9rem;
-            margin-bottom: 8px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -649,7 +653,6 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 0.9rem;
-            margin-bottom: 8px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -1056,7 +1059,7 @@
     <div class="container">
         <div class="mobile-header">
             <button class="mobile-menu-btn" id="menu-btn">☰</button>
-            <h1 id="mobile-title">Twin</h1>
+            <h1 id="mobile-title">Мессенджер</h1>
             <div style="width: 24px;"></div>
         </div>
         
@@ -1084,8 +1087,8 @@
                 </div>
                 
                 <div class="search-results" id="search-results">
-                                        <!-- Результаты поиска будут здесь -->                
-                                        </div>
+                    <!-- Результаты поиска будут здесь -->
+                </div>
                 
                 <div class="settings">
                     <button class="create-group-btn" id="create-group-btn">Создать группу</button>
@@ -3369,6 +3372,15 @@
                 chatId = getChatId(currentUser, currentChat);
             }
             
+            // Проверяем, может ли пользователь отправлять сообщения в этот чат
+            if (currentChatType === 'channel') {
+                const channel = channels.find(c => c.id === chatId);
+                if (channel && channel.creator !== currentUser) {
+                    showNotification('Только создатель канала может отправлять сообщения');
+                    return;
+                }
+            }
+            
             const message = {
                 sender: currentUser,
                 text: text,
@@ -3780,7 +3792,13 @@
             emptyState.style.display = 'none';
             chatHeader.style.display = 'flex';
             chatMessages.style.display = 'block';
-            messageInputContainer.style.display = 'flex';
+            
+            // Показываем поле ввода только если пользователь - создатель канала
+            if (currentChannel && currentChannel.creator === currentUser) {
+                messageInputContainer.style.display = 'flex';
+            } else {
+                messageInputContainer.style.display = 'none';
+            }
             
             // Обновляем имя канала
             chatUserEmoji.textContent = '📢';
@@ -3887,14 +3905,6 @@
                     JSON.stringify({ online: false, lastSeen: Date.now() }));
             }
         });
-    </script>
-</body>
-</html>y({ online: false, lastSeen: Date.now() }));
-            }
-        });
-    </script>
-</body>
-</html>       });
     </script>
 </body>
 </html>
