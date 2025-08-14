@@ -27,6 +27,8 @@
             --offline-color: #e74c3c;
             --notification-bg: #6c5ce7;
             --notification-text: #ffffff;
+            --channel-bg: #f0f3ff;
+            --channel-hover: #e1e6ff;
         }
         
         /* Темная тема */
@@ -44,6 +46,8 @@
             --header-bg: #2d2d2d;
             --notification-bg: #5a4fcf;
             --notification-text: #f0f0f0;
+            --channel-bg: #2a2a4a;
+            --channel-hover: #3a3a5a;
         }
         
         * {
@@ -51,6 +55,7 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
         body {
@@ -60,6 +65,9 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
         
         .container {
@@ -70,6 +78,8 @@
             flex-direction: column;
             overflow: hidden;
             transition: background-color 0.3s;
+            -webkit-overflow-scrolling: touch;
+            will-change: transform;
         }
         
         .mobile-header {
@@ -79,6 +89,10 @@
             color: white;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .mobile-header h1 {
@@ -92,12 +106,17 @@
             color: white;
             font-size: 1.5rem;
             cursor: pointer;
+            padding: 5px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .content-wrapper {
             display: flex;
             flex: 1;
             overflow: hidden;
+            will-change: transform;
         }
         
         .sidebar {
@@ -107,6 +126,9 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
+            will-change: transform;
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
         }
         
         .user-profile {
@@ -114,6 +136,10 @@
             background: var(--primary-color);
             color: white;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .user-profile h2 {
@@ -156,6 +182,10 @@
         .tabs {
             display: flex;
             border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--sidebar-bg);
         }
         
         .tab {
@@ -168,6 +198,10 @@
             font-size: 0.9rem;
             color: var(--text-light);
             transition: all 0.2s;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
         }
         
         .tab.active {
@@ -178,6 +212,10 @@
         .search-container {
             padding: 10px;
             border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--sidebar-bg);
         }
         
         .search-box {
@@ -189,12 +227,17 @@
             outline: none;
             background: var(--input-bg);
             color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         
         .search-results {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .user-item {
@@ -205,6 +248,9 @@
             display: flex;
             align-items: center;
             position: relative;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .user-item:active {
@@ -301,6 +347,8 @@
             flex-direction: column;
             position: relative;
             height: 100%;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .chat-header {
@@ -312,6 +360,9 @@
             background: var(--header-bg);
             z-index: 10;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .chat-header-left {
@@ -339,6 +390,9 @@
             display: none;
             cursor: pointer;
             color: var(--text-color);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .chat-header-actions {
@@ -355,6 +409,9 @@
             padding: 5px;
             border-radius: 50%;
             transition: background 0.2s;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .chat-header-btn:hover {
@@ -368,6 +425,8 @@
             -webkit-overflow-scrolling: touch;
             background: var(--bg-color);
             padding-bottom: 80px;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .message {
@@ -375,6 +434,8 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .message.sent {
@@ -393,6 +454,8 @@
             word-wrap: break-word;
             line-height: 1.4;
             font-size: 0.95rem;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .message.sent .message-content {
@@ -446,6 +509,8 @@
             right: 0;
             z-index: 100;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .message-input input {
@@ -457,6 +522,9 @@
             outline: none;
             background: var(--input-bg);
             color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         
         .message-input button {
@@ -473,6 +541,9 @@
             justify-content: center;
             transition: background 0.2s;
             flex-shrink: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .message-input button:active {
@@ -522,10 +593,12 @@
             z-index: 1000;
             max-width: 90%;
             text-align: center;
+            will-change: transform, opacity;
+            transform: translateX(-50%) translateY(100px) translateZ(0);
         }
         
         .notification.show {
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0) translateZ(0);
             opacity: 1;
         }
         
@@ -545,6 +618,9 @@
             transition: background 0.2s;
             font-size: 0.9rem;
             margin-bottom: 8px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .create-group-btn {
@@ -558,6 +634,25 @@
             transition: background 0.2s;
             font-size: 0.9rem;
             margin-bottom: 8px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .create-channel-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .logout-btn {
@@ -570,6 +665,9 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 0.9rem;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .settings-btn:active {
@@ -578,6 +676,10 @@
         
         .create-group-btn:active {
             background: var(--success-dark);
+        }
+        
+        .create-channel-btn:active {
+            background: var(--primary-dark);
         }
         
         .logout-btn:active {
@@ -598,6 +700,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            will-change: opacity;
         }
         
         .modal.active {
@@ -616,10 +719,12 @@
             color: var(--text-color);
             max-height: 90vh;
             overflow-y: auto;
+            will-change: transform;
+            transform: translateY(20px) translateZ(0);
         }
         
         .modal.active .modal-content {
-            transform: translateY(0);
+            transform: translateY(0) translateZ(0);
         }
         
         .modal-title {
@@ -637,6 +742,9 @@
             font-size: 1rem;
             background: var(--input-bg);
             color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         
         .modal-actions {
@@ -651,6 +759,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.95rem;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .modal-btn-primary {
@@ -771,6 +882,87 @@
             cursor: pointer;
         }
         
+        /* Стили для каналов */
+        .channel-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: var(--channel-bg);
+        }
+        
+        .channel-item:active {
+            background: var(--channel-hover);
+        }
+        
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+        
+        .channel-info {
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .channel-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+        
+        .channel-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .channel-subscribers {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .subscribe-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .subscribe-btn:active {
+            background: var(--primary-dark);
+        }
+        
+        .subscribe-btn.subscribed {
+            background: var(--text-light);
+            color: var(--text-color);
+        }
+        
         @media (max-width: 768px) {
             .mobile-header {
                 display: flex;
@@ -884,6 +1076,7 @@
                 <div class="tabs">
                     <button class="tab active" id="chats-tab">Чаты</button>
                     <button class="tab" id="users-tab">Пользователи</button>
+                    <button class="tab" id="channels-tab">Каналы</button>
                 </div>
                 
                 <div class="search-container">
@@ -896,6 +1089,7 @@
                 
                 <div class="settings">
                     <button class="create-group-btn" id="create-group-btn">Создать группу</button>
+                    <button class="create-channel-btn" id="create-channel-btn">Создать канал</button>
                     <button class="settings-btn" id="settings-btn">Настройки</button>
                     <button class="logout-btn" id="logout-btn">Выйти</button>
                 </div>
@@ -923,6 +1117,7 @@
                         <button class="chat-header-btn" id="block-user-btn" title="Заблокировать пользователя">🚫</button>
                         <button class="chat-header-btn" id="delete-chat-btn" title="Удалить чат">🗑️</button>
                         <button class="chat-header-btn" id="group-settings-btn" title="Настройки группы" style="display: none;">⚙️</button>
+                        <button class="chat-header-btn" id="channel-settings-btn" title="Настройки канала" style="display: none;">⚙️</button>
                     </div>
                 </div>
                 
@@ -1007,6 +1202,21 @@
         </div>
     </div>
     
+    <!-- Модальное окно создания канала -->
+    <div class="modal" id="create-channel-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Создание канала</h2>
+            
+            <input type="text" class="modal-input" id="channel-name-input" placeholder="Название канала">
+            <textarea class="modal-input" id="channel-description-input" rows="3" placeholder="Описание канала"></textarea>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-channel-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="create-channel-confirm-btn">Создать</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Модальное окно редактирования сообщения -->
     <div class="modal" id="edit-message-modal">
         <div class="modal-content">
@@ -1037,6 +1247,22 @@
                 <button class="modal-btn modal-btn-secondary" id="cancel-group-settings-btn">Отмена</button>
                 <button class="modal-btn modal-btn-primary" id="save-group-settings-btn">Сохранить</button>
                 <button class="modal-btn" id="leave-group-btn" style="background: var(--danger-color); color: white;">Покинуть группу</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно настроек канала -->
+    <div class="modal" id="channel-settings-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Настройки канала</h2>
+            
+            <input type="text" class="modal-input" id="edit-channel-name-input" placeholder="Название канала">
+            <textarea class="modal-input" id="edit-channel-description-input" rows="3" placeholder="Описание канала"></textarea>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-channel-settings-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-channel-settings-btn">Сохранить</button>
+                <button class="modal-btn" id="unsubscribe-channel-btn" style="background: var(--danger-color); color: white;">Отписаться</button>
             </div>
         </div>
     </div>
@@ -1072,6 +1298,7 @@
         const saveSettingsBtn = document.getElementById('save-settings-btn');
         const chatsTab = document.getElementById('chats-tab');
         const usersTab = document.getElementById('users-tab');
+        const channelsTab = document.getElementById('channels-tab');
         const themeToggle = document.getElementById('theme-toggle');
         const emojiOptions = document.getElementById('emoji-options');
         const editMessageModal = document.getElementById('edit-message-modal');
@@ -1095,10 +1322,24 @@
         const cancelGroupSettingsBtn = document.getElementById('cancel-group-settings-btn');
         const saveGroupSettingsBtn = document.getElementById('save-group-settings-btn');
         const leaveGroupBtn = document.getElementById('leave-group-btn');
+        const createChannelBtn = document.getElementById('create-channel-btn');
+        const createChannelModal = document.getElementById('create-channel-modal');
+        const channelNameInput = document.getElementById('channel-name-input');
+        const channelDescriptionInput = document.getElementById('channel-description-input');
+        const cancelChannelBtn = document.getElementById('cancel-channel-btn');
+        const createChannelConfirmBtn = document.getElementById('create-channel-confirm-btn');
+        const channelSettingsBtn = document.getElementById('channel-settings-btn');
+        const channelSettingsModal = document.getElementById('channel-settings-modal');
+        const editChannelNameInput = document.getElementById('edit-channel-name-input');
+        const editChannelDescriptionInput = document.getElementById('edit-channel-description-input');
+        const cancelChannelSettingsBtn = document.getElementById('cancel-channel-settings-btn');
+        const saveChannelSettingsBtn = document.getElementById('save-channel-settings-btn');
+        const unsubscribeChannelBtn = document.getElementById('unsubscribe-channel-btn');
         
         // Состояние приложения
         let currentUser = null;
         let currentChat = null;
+        let currentChatType = null; // 'user', 'group', 'channel'
         let messageListeners = {};
         let activeTab = 'chats';
         let userEmoji = '😊';
@@ -1107,6 +1348,9 @@
         let blockedUsers = [];
         let groups = [];
         let currentGroup = null;
+        let channels = [];
+        let currentChannel = null;
+        let subscribedChannels = [];
         let lastMessageTimestamp = 0;
         let notificationSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
         
@@ -1131,11 +1375,13 @@
                 // Загружаем данные пользователя
                 await loadUserData();
                 await loadBlockedUsers();
+                await loadSubscribedChannels();
                 
                 currentUserEl.querySelector('span:last-child').textContent = currentUser;
                 await updateUserStatus(true);
                 loadRecentChats();
                 loadGroups();
+                loadChannels();
                 
                 // Запускаем проверку новых сообщений и уведомлений
                 startBackgroundChecks();
@@ -1151,6 +1397,57 @@
             
             // Инициализация поля ввода
             adjustMessageInput();
+            
+            // Оптимизация для Android
+            optimizeForAndroid();
+        }
+        
+        function optimizeForAndroid() {
+            // Оптимизация производительности для Android
+            if ('ontouchstart' in window) {
+                // Добавляем класс для устройств с сенсорным экраном
+                document.body.classList.add('touch-device');
+                
+                // Оптимизация прокрутки
+                document.querySelectorAll('.search-results, .chat-messages, .participants-list, .blocked-list').forEach(element => {
+                    element.style.webkitOverflowScrolling = 'touch';
+                });
+                
+                // Оптимизация обработки касаний
+                document.querySelectorAll('button, .user-item, .channel-item, .tab, .chat-header-btn').forEach(element => {
+                    element.addEventListener('touchstart', function() {
+                        this.style.opacity = '0.8';
+                    }, { passive: true });
+                    
+                    element.addEventListener('touchend', function() {
+                        this.style.opacity = '1';
+                    }, { passive: true });
+                });
+            }
+            
+            // Предотвращение двойного касания для увеличения
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Оптимизация для виртуальной клавиатуры Android
+            const viewport = document.querySelector('meta[name=viewport]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height, viewport-fit=cover');
+            }
+            
+            // Предотвращение масштабирования при фокусе на поле ввода
+            messageText.addEventListener('focus', function() {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                }, 100);
+            });
         }
         
         function setupEventListeners() {
@@ -1183,11 +1480,22 @@
             cancelGroupBtn.addEventListener('click', closeCreateGroup);
             createGroupConfirmBtn.addEventListener('click', createGroup);
             
+            // Создание канала
+            createChannelBtn.addEventListener('click', openCreateChannel);
+            cancelChannelBtn.addEventListener('click', closeCreateChannel);
+            createChannelConfirmBtn.addEventListener('click', createChannel);
+            
             // Настройки группы
             groupSettingsBtn.addEventListener('click', openGroupSettings);
             cancelGroupSettingsBtn.addEventListener('click', closeGroupSettings);
             saveGroupSettingsBtn.addEventListener('click', saveGroupSettings);
             leaveGroupBtn.addEventListener('click', leaveGroup);
+            
+            // Настройки канала
+            channelSettingsBtn.addEventListener('click', openChannelSettings);
+            cancelChannelSettingsBtn.addEventListener('click', closeChannelSettings);
+            saveChannelSettingsBtn.addEventListener('click', saveChannelSettings);
+            unsubscribeChannelBtn.addEventListener('click', unsubscribeChannel);
             
             // Переключение темы
             themeToggle.addEventListener('change', toggleTheme);
@@ -1225,6 +1533,7 @@
             // Переключение вкладок
             chatsTab.addEventListener('click', () => switchTab('chats'));
             usersTab.addEventListener('click', () => switchTab('users'));
+            channelsTab.addEventListener('click', () => switchTab('channels'));
             
             // Блокировка пользователя
             blockUserBtn.addEventListener('click', toggleBlockUser);
@@ -1266,6 +1575,9 @@
             
             // Проверка уведомлений о добавлении в группу каждые 10 секунд
             setInterval(checkForGroupInvites, 10000);
+            
+            // Проверка уведомлений о новых каналах каждые 15 секунд
+            setInterval(checkForChannelUpdates, 15000);
         }
         
         async function checkForNewMessages() {
@@ -1282,7 +1594,8 @@
                 // Проверяем каждый чат, где участвует текущий пользователь
                 Object.keys(allChats).forEach(chatId => {
                     // Проверяем, что это чат текущего пользователя (личный или групповой)
-                    if (chatId.includes(currentUser) || (chatId.startsWith('group_') && groups.some(g => g.id === chatId))) {
+                    if (chatId.includes(currentUser) || (chatId.startsWith('group_') && groups.some(g => g.id === chatId)) || 
+                        (chatId.startsWith('channel_') && subscribedChannels.includes(chatId))) {
                         const messages = allChats[chatId];
                         const messagesArray = Object.keys(messages).map(key => ({
                             id: key,
@@ -1303,6 +1616,11 @@
                                 const group = groups.find(g => g.id === chatId);
                                 if (group) {
                                     senderName = `${group.name}: ${latestMessage.sender}`;
+                                }
+                            } else if (chatId.startsWith('channel_')) {
+                                const channel = channels.find(c => c.id === chatId);
+                                if (channel) {
+                                    senderName = `${channel.name}: ${latestMessage.sender}`;
                                 }
                             }
                             
@@ -1352,6 +1670,49 @@
             }
         }
         
+        async function checkForChannelUpdates() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все каналы
+                const response = await fetch(`${firebaseURL}channels.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке обновлений каналов');
+                
+                const allChannels = await response.json();
+                if (!allChannels) return;
+                
+                // Проверяем каждый канал
+                Object.keys(allChannels).forEach(channelId => {
+                    const channel = allChannels[channelId];
+                    
+                    // Проверяем, есть ли новые сообщения в канале, на который подписан пользователь
+                    if (subscribedChannels.includes(channelId) && channel.messages) {
+                        const messages = Object.keys(channel.messages).map(key => ({
+                            id: key,
+                            ...channel.messages[key]
+                        }));
+                        
+                        const latestMessage = messages
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
+                            latestMessage.sender !== currentUser && document.hidden) {
+                            
+                            // Показываем уведомление
+                            showNotification(`Новое сообщение в канале "${channel.name}": ${truncate(latestMessage.text, 30)}`);
+                            playNotificationSound();
+                            
+                            // Обновляем время последнего сообщения
+                            lastMessageTimestamp = latestMessage.timestamp;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке обновлений каналов:', error);
+            }
+        }
+        
         function playNotificationSound() {
             try {
                 notificationSound.currentTime = 0;
@@ -1394,14 +1755,18 @@
         function switchTab(tab) {
             activeTab = tab;
             
+            // Сброс активных вкладок
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
             if (tab === 'chats') {
                 chatsTab.classList.add('active');
-                usersTab.classList.remove('active');
                 loadRecentChats();
-            } else {
+            } else if (tab === 'users') {
                 usersTab.classList.add('active');
-                chatsTab.classList.remove('active');
                 loadUsers();
+            } else if (tab === 'channels') {
+                channelsTab.classList.add('active');
+                loadChannels();
             }
         }
         
@@ -1479,7 +1844,8 @@
                                 emoji: userEmoji,
                                 online: true,
                                 lastSeen: Date.now(),
-                                blockedUsers: blockedUsers
+                                blockedUsers: blockedUsers,
+                                subscribedChannels: subscribedChannels
                             })
                         })
                     ]);
@@ -1489,12 +1855,13 @@
                     currentUser = newUsername;
                     currentUserEl.querySelector('span:last-child').textContent = newUsername;
                 } else {
-                    // Если изменился только эмодзи или список заблокированных
+                    // Если изменился только эмодзи или список заблокированных/подписанных каналов
                     await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
                         method: 'PATCH',
                         body: JSON.stringify({
                             emoji: userEmoji,
-                            blockedUsers: blockedUsers
+                            blockedUsers: blockedUsers,
+                            subscribedChannels: subscribedChannels
                         })
                     });
                 }
@@ -1508,8 +1875,10 @@
                 // Обновляем список чатов или пользователей в зависимости от активной вкладки
                 if (activeTab === 'chats') {
                     loadRecentChats();
-                } else {
+                } else if (activeTab === 'users') {
                     loadUsers();
+                } else if (activeTab === 'channels') {
+                    loadChannels();
                 }
                 
             } catch (error) {
@@ -1587,8 +1956,8 @@
         }
         
         async function toggleBlockUser() {
-            if (!currentChat || currentChat.startsWith('group_')) {
-                showNotification('Нельзя заблокировать группу');
+            if (!currentChat || currentChatType !== 'user') {
+                showNotification('Нельзя заблокировать группу или канал');
                 return;
             }
             
@@ -1780,6 +2149,7 @@
             }
             
             currentChat = groupId;
+            currentChatType = 'group';
             currentGroup = groups.find(g => g.id === groupId);
             emptyState.style.display = 'none';
             chatHeader.style.display = 'flex';
@@ -1800,6 +2170,9 @@
             } else {
                 groupSettingsBtn.style.display = 'none';
             }
+            
+            // Скрываем кнопку настроек канала
+            channelSettingsBtn.style.display = 'none';
             
             // Настройка поля ввода для мобильных
             adjustMessageInput();
@@ -1975,12 +2348,19 @@
             if (!currentChat) return;
             
             let confirmMessage = '';
-            if (currentChat.startsWith('group_')) {
+            if (currentChatType === 'group') {
                 const group = groups.find(g => g.id === currentChat);
                 if (group && group.admin === currentUser) {
                     confirmMessage = 'Вы уверены, что хотите удалить эту группу? Это действие необратимо.';
                 } else {
                     confirmMessage = 'Вы уверены, что хотите покинуть эту группу?';
+                }
+            } else if (currentChatType === 'channel') {
+                const channel = channels.find(c => c.id === currentChat);
+                if (channel && channel.creator === currentUser) {
+                    confirmMessage = 'Вы уверены, что хотите удалить этот канал? Это действие необратимо.';
+                } else {
+                    confirmMessage = 'Вы уверены, что хотите отписаться от этого канала?';
                 }
             } else {
                 confirmMessage = 'Вы уверены, что хотите удалить этот чат? Все сообщения будут удалены.';
@@ -1988,7 +2368,7 @@
             
             if (confirm(confirmMessage)) {
                 try {
-                    if (currentChat.startsWith('group_')) {
+                    if (currentChatType === 'group') {
                         const group = groups.find(g => g.id === currentChat);
                         if (group && group.admin === currentUser) {
                             // Удаление группы (только администратор)
@@ -2018,6 +2398,24 @@
                         
                         // Обновляем список групп
                         loadGroups();
+                    } else if (currentChatType === 'channel') {
+                        const channel = channels.find(c => c.id === currentChat);
+                        if (channel && channel.creator === currentUser) {
+                            // Удаление канала (только создатель)
+                            await fetch(`${firebaseURL}channels/${currentChat}.json`, {
+                                method: 'DELETE'
+                            });
+                            
+                            showNotification('Канал удален');
+                        } else {
+                            // Отписка от канала
+                            await unsubscribeFromChannel(currentChat);
+                            
+                            showNotification('Вы отписались от канала');
+                        }
+                        
+                        // Обновляем список каналов
+                        loadChannels();
                     } else {
                         // Удаление личного чата
                         const chatId = getChatId(currentUser, currentChat);
@@ -2146,6 +2544,7 @@
                     // Загружаем последние чаты
                     loadRecentChats();
                     loadGroups();
+                    loadChannels();
                     
                     document.body.removeChild(modal);
                     
@@ -2180,6 +2579,9 @@
                     if (userData.blockedUsers) {
                         blockedUsers = userData.blockedUsers;
                     }
+                    if (userData.subscribedChannels) {
+                        subscribedChannels = userData.subscribedChannels;
+                    }
                 }
             } catch (error) {
                 console.error('Ошибка загрузки данных пользователя:', error);
@@ -2195,7 +2597,8 @@
                         emoji: emoji,
                         online: true,
                         lastSeen: Date.now(),
-                        blockedUsers: []
+                        blockedUsers: [],
+                        subscribedChannels: []
                     })
                 });
                 
@@ -2235,8 +2638,8 @@
                 // Обрабатываем личные чаты
                 if (allChats) {
                     Object.keys(allChats).forEach(chatId => {
-                        // Проверяем, что текущий пользователь участвует в чате и это не группа
-                        if (chatId.includes(currentUser) && !chatId.startsWith('group_')) {
+                        // Проверяем, что текущий пользователь участвует в чате и это не группа и не канал
+                        if (chatId.includes(currentUser) && !chatId.startsWith('group_') && !chatId.startsWith('channel_')) {
                             const messages = allChats[chatId];
                             
                             // Преобразуем сообщения в массив
@@ -2307,6 +2710,46 @@
                     }
                 }
                 
+                // Обрабатываем каналы
+                for (const channel of channels) {
+                    const channelId = channel.id;
+                    const channelMessages = allChats && allChats[channelId];
+                    
+                    if (channelMessages) {
+                        // Преобразуем сообщения в массив
+                        const messagesArray = Object.keys(channelMessages).map(key => ({
+                            id: key,
+                            ...channelMessages[key]
+                        }));
+                        
+                        // Находим последнее сообщение
+                        const lastMessage = messagesArray
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (lastMessage) {
+                            recentChats.push({
+                                id: channelId,
+                                name: channel.name,
+                                lastMessage: lastMessage.text,
+                                timestamp: lastMessage.timestamp,
+                                sender: lastMessage.sender,
+                                type: 'channel'
+                            });
+                        }
+                    } else {
+                        // Если сообщений нет, все равно добавляем канал
+                        recentChats.push({
+                            id: channelId,
+                            name: channel.name,
+                            lastMessage: 'Нет сообщений',
+                            timestamp: channel.createdAt,
+                            sender: null,
+                            type: 'channel'
+                        });
+                    }
+                }
+                
                 // Сортируем чаты по времени последнего сообщения
                 recentChats.sort((a, b) => b.timestamp - a.timestamp);
                 
@@ -2339,10 +2782,10 @@
             
             const chatsWithUserData = await Promise.all(usersPromises);
             
-            // Добавляем групповые чаты
+            // Добавляем групповые чаты и каналы
             const allChats = [
                 ...chatsWithUserData,
-                ...chats.filter(chat => chat.type === 'group')
+                ...chats.filter(chat => chat.type === 'group' || chat.type === 'channel')
             ];
             
             allChats.forEach(chat => {
@@ -2370,10 +2813,14 @@
                     avatar = chat.userData.nickname.charAt(0).toUpperCase();
                     name = chat.userData.nickname;
                     emoji = chat.userData.emoji || '😊';
-                } else {
+                } else if (chat.type === 'group') {
                     avatar = '👥';
                     name = chat.name;
                     emoji = '👥';
+                } else { // channel
+                    avatar = '📢';
+                    name = chat.name;
+                    emoji = '📢';
                 }
                 
                 userItem.innerHTML = `
@@ -2402,8 +2849,10 @@
                     
                     if (chat.type === 'user') {
                         openChat(chat.userData.nickname, chat.userData.emoji || '😊');
-                    } else {
+                    } else if (chat.type === 'group') {
                         openGroupChat(chat.id, chat.name);
+                    } else if (chat.type === 'channel') {
+                        openChannelChat(chat.id, chat.name);
                     }
                 });
                 
@@ -2419,6 +2868,13 @@
                             confirmMessage = 'Вы уверены, что хотите удалить эту группу? Это действие необратимо.';
                         } else {
                             confirmMessage = 'Вы уверены, что хотите покинуть эту группу?';
+                        }
+                    } else if (chat.type === 'channel') {
+                        const channel = channels.find(c => c.id === chat.id);
+                        if (channel && channel.creator === currentUser) {
+                            confirmMessage = 'Вы уверены, что хотите удалить этот канал? Это действие необратимо.';
+                        } else {
+                            confirmMessage = 'Вы уверены, что хотите отписаться от этого канала?';
                         }
                     } else {
                         confirmMessage = 'Вы уверены, что хотите удалить этот чат? Все сообщения будут удалены.';
@@ -2465,6 +2921,29 @@
                     
                     // Обновляем список групп
                     loadGroups();
+                } else if (type === 'channel') {
+                    const channel = channels.find(c => c.id === chatId);
+                    if (channel && channel.creator === currentUser) {
+                        // Удаление канала (только создатель)
+                        await fetch(`${firebaseURL}channels/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        // Удаление сообщений канала
+                        await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        showNotification('Канал удален');
+                    } else {
+                        // Отписка от канала
+                        await unsubscribeFromChannel(chatId);
+                        
+                        showNotification('Вы отписались от канала');
+                    }
+                    
+                    // Обновляем список каналов
+                    loadChannels();
                 } else {
                     // Удаление личного чата
                     await fetch(`${firebaseURL}messages/${chatId}.json`, {
@@ -2555,52 +3034,111 @@
                 // Если поиск пустой, загружаем контент в зависимости от активной вкладки
                 if (activeTab === 'chats') {
                     loadRecentChats();
-                } else {
+                } else if (activeTab === 'users') {
                     loadUsers();
+                } else if (activeTab === 'channels') {
+                    loadChannels();
                 }
                 return;
             }
             
             try {
-                const response = await fetch(`${firebaseURL}users.json`);
-                if (!response.ok) throw new Error('Ошибка при поиске пользователей');
-                
-                const users = await response.json();
-                searchResults.innerHTML = '';
-                
-                if (!users) {
-                    searchResults.innerHTML = '<div class="user-item">Пользователи не найдены</div>';
-                    return;
-                }
-                
-                Object.keys(users).forEach(key => {
-                    const user = users[key];
-                    if (key !== currentUser && user && user.nickname && 
-                        user.nickname.toLowerCase().includes(query)) {
-                        // Проверяем, не заблокирован ли пользователь
-                        const isBlocked = blockedUsers.includes(key);
-                        
-                        const userItem = document.createElement('div');
-                        userItem.className = 'user-item';
-                        userItem.innerHTML = `
-                            <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
-                            <div class="user-info">
-                                <h3>
-                                    <span class="user-emoji-small">${user.emoji || '😊'}</span>
-                                    <span>${user.nickname}</span>
-                                    ${isBlocked ? '<span style="color: var(--danger-color); margin-left: 5px;">(Заблокирован)</span>' : ''}
-                                </h3>
-                                <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
-                            </div>
-                        `;
-                        
-                        if (!isBlocked) {
-                            userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
-                        }
-                        
-                        searchResults.appendChild(userItem);
+                if (activeTab === 'users') {
+                    const response = await fetch(`${firebaseURL}users.json`);
+                    if (!response.ok) throw new Error('Ошибка при поиске пользователей');
+                    
+                    const users = await response.json();
+                    searchResults.innerHTML = '';
+                    
+                    if (!users) {
+                        searchResults.innerHTML = '<div class="user-item">Пользователи не найдены</div>';
+                        return;
                     }
-                });
+                    
+                    Object.keys(users).forEach(key => {
+                        const user = users[key];
+                        if (key !== currentUser && user && user.nickname && 
+                            user.nickname.toLowerCase().includes(query)) {
+                            // Проверяем, не заблокирован ли пользователь
+                            const isBlocked = blockedUsers.includes(key);
+                            
+                            const userItem = document.createElement('div');
+                            userItem.className = 'user-item';
+                            userItem.innerHTML = `
+                                <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
+                                <div class="user-info">
+                                    <h3>
+                                        <span class="user-emoji-small">${user.emoji || '😊'}</span>
+                                        <span>${user.nickname}</span>
+                                        ${isBlocked ? '<span style="color: var(--danger-color); margin-left: 5px;">(Заблокирован)</span>' : ''}
+                                    </h3>
+                                    <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
+                                </div>
+                            `;
+                            
+                            if (!isBlocked) {
+                                userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
+                            }
+                            
+                            searchResults.appendChild(userItem);
+                        }
+                    });
+                } else if (activeTab === 'channels') {
+                    const response = await fetch(`${firebaseURL}channels.json`);
+                    if (!response.ok) throw new Error('Ошибка при поиске каналов');
+                    
+                    const allChannels = await response.json();
+                    searchResults.innerHTML = '';
+                    
+                    if (!allChannels) {
+                        searchResults.innerHTML = '<div class="user-item">Каналы не найдены</div>';
+                        return;
+                    }
+                    
+                    Object.keys(allChannels).forEach(channelId => {
+                        const channel = allChannels[channelId];
+                        if (channel && channel.name && 
+                            channel.name.toLowerCase().includes(query)) {
+                            
+                            const channelItem = document.createElement('div');
+                            channelItem.className = 'channel-item';
+                            
+                            const isSubscribed = subscribedChannels.includes(channelId);
+                            
+                            channelItem.innerHTML = `
+                                <div class="channel-icon">📢</div>
+                                <div class="channel-info">
+                                    <h3>${channel.name}</h3>
+                                    <p>${channel.description || 'Нет описания'}</p>
+                                    <div class="channel-subscribers">
+                                        <span>👤 ${channel.subscribers ? channel.subscribers.length : 0}</span>
+                                    </div>
+                                </div>
+                                <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" data-channel-id="${channelId}">
+                                    ${isSubscribed ? 'Отписаться' : 'Подписаться'}
+                                </button>
+                            `;
+                            
+                            // Обработчик подписки/отписки
+                            const subscribeBtn = channelItem.querySelector('.subscribe-btn');
+                            subscribeBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                toggleSubscribe(channelId);
+                            });
+                            
+                            // Обработчик открытия канала
+                            channelItem.addEventListener('click', () => {
+                                if (isSubscribed) {
+                                    openChannelChat(channelId, channel.name);
+                                } else {
+                                    showNotification('Подпишитесь на канал, чтобы просматривать сообщения');
+                                }
+                            });
+                            
+                            searchResults.appendChild(channelItem);
+                        }
+                    });
+                }
             } catch (error) {
                 showNotification('Ошибка: ' + error.message);
             }
@@ -2619,7 +3157,9 @@
             }
             
             currentChat = username;
+            currentChatType = 'user';
             currentGroup = null;
+            currentChannel = null;
             emptyState.style.display = 'none';
             chatHeader.style.display = 'flex';
             chatMessages.style.display = 'block';
@@ -2633,6 +3173,7 @@
             // Показываем кнопку блокировки для личных чатов
             blockUserBtn.style.display = 'block';
             groupSettingsBtn.style.display = 'none';
+            channelSettingsBtn.style.display = 'none';
             
             // Обновляем состояние кнопки блокировки
             if (blockedUsers.includes(username)) {
@@ -2670,7 +3211,9 @@
             }
             
             currentChat = null;
+            currentChatType = null;
             currentGroup = null;
+            currentChannel = null;
         }
         
         async function loadMessages() {
@@ -2678,7 +3221,7 @@
             
             try {
                 let chatId;
-                if (currentChat.startsWith('group_')) {
+                if (currentChatType === 'group' || currentChatType === 'channel') {
                     chatId = currentChat;
                 } else {
                     chatId = getChatId(currentUser, currentChat);
@@ -2710,15 +3253,12 @@
                 ...messages[key]
             }));
             
-            // Фильтруем сообщения от заблокированных пользователей
+            // Фильтруем сообщения от заблокированных пользователей (только для личных чатов)
             const filteredMessages = messagesArray.filter(message => {
-                if (currentChat.startsWith('group_')) {
-                    // Для групповых чатов не фильтруем сообщения от заблокированных пользователей
-                    return true;
-                } else {
-                    // Для личных чатов фильтруем сообщения от заблокированных пользователей
+                if (currentChatType === 'user') {
                     return !blockedUsers.includes(message.sender);
                 }
+                return true;
             });
             
             // Сортируем сообщения по времени с учетом ID для сообщений с одинаковым timestamp
@@ -2772,10 +3312,11 @@
                     </div>
                 ` : '';
                 
-                // Для групповых чатов добавляем имя отправителя
-                const senderName = currentChat.startsWith('group_') && !isSent 
-                    ? `<div style="font-size: 0.8rem; margin-bottom: 3px; color: var(--text-light);">${message.sender}</div>` 
-                    : '';
+                // Для групповых чатов и каналов добавляем имя отправителя
+                let senderName = '';
+                if ((currentChatType === 'group' || currentChatType === 'channel') && !isSent) {
+                    senderName = `<div style="font-size: 0.8rem; margin-bottom: 3px; color: var(--text-light);">${message.sender}</div>`;
+                }
                 
                 // Добавляем отметку "изменено" для отредактированных сообщений
                 const editedMark = message.edited ? ' <span style="font-size: 0.7rem; color: var(--text-light);">(изменено)</span>' : '';
@@ -2822,7 +3363,7 @@
             if (!text || !currentChat) return;
             
             let chatId;
-            if (currentChat.startsWith('group_')) {
+            if (currentChatType === 'group' || currentChatType === 'channel') {
                 chatId = currentChat;
             } else {
                 chatId = getChatId(currentUser, currentChat);
@@ -2835,7 +3376,7 @@
             };
             
             // Если это личный чат, добавляем получателя
-            if (!currentChat.startsWith('group_')) {
+            if (currentChatType === 'user') {
                 message.receiver = currentChat;
             }
             
@@ -2893,7 +3434,7 @@
             
             try {
                 let chatId;
-                if (currentChat.startsWith('group_')) {
+                if (currentChatType === 'group' || currentChatType === 'channel') {
                     chatId = currentChat;
                 } else {
                     chatId = getChatId(currentUser, currentChat);
@@ -2928,7 +3469,7 @@
             
             try {
                 let chatId;
-                if (currentChat.startsWith('group_')) {
+                if (currentChatType === 'group' || currentChatType === 'channel') {
                     chatId = currentChat;
                 } else {
                     chatId = getChatId(currentUser, currentChat);
@@ -2992,6 +3533,350 @@
                     func.apply(context, args);
                 }, wait);
             };
+        }
+        
+        // Функции для работы с каналами
+        async function openCreateChannel() {
+            channelNameInput.value = '';
+            channelDescriptionInput.value = '';
+            
+            createChannelModal.classList.add('active');
+        }
+        
+        function closeCreateChannel() {
+            createChannelModal.classList.remove('active');
+        }
+        
+        async function createChannel() {
+            const channelName = channelNameInput.value.trim();
+            const channelDescription = channelDescriptionInput.value.trim();
+            
+            if (!channelName) {
+                showNotification('Пожалуйста, введите название канала');
+                return;
+            }
+            
+            try {
+                // Генерируем уникальный ID канала
+                const channelId = 'channel_' + Date.now();
+                
+                // Создаем канал в Firebase
+                await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: channelName,
+                        description: channelDescription,
+                        creator: currentUser,
+                        subscribers: [currentUser],
+                        createdAt: Date.now()
+                    })
+                });
+                
+                showNotification('Канал создан успешно');
+                closeCreateChannel();
+                
+                // Обновляем список каналов
+                loadChannels();
+                
+                // Открываем чат канала
+                openChannelChat(channelId, channelName);
+                
+                // Обновляем список подписанных каналов
+                subscribedChannels.push(channelId);
+                await updateSubscribedChannels();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function loadChannels() {
+            try {
+                const response = await fetch(`${firebaseURL}channels.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке каналов');
+                
+                const channelsData = await response.json();
+                channels = [];
+                
+                if (channelsData) {
+                    Object.keys(channelsData).forEach(channelId => {
+                        const channel = channelsData[channelId];
+                        channels.push({
+                            id: channelId,
+                            name: channel.name,
+                            description: channel.description,
+                            creator: channel.creator,
+                            subscribers: channel.subscribers || [],
+                            createdAt: channel.createdAt
+                        });
+                    });
+                }
+                
+                displayChannels();
+            } catch (error) {
+                console.error('Ошибка загрузки каналов:', error);
+            }
+        }
+        
+        function displayChannels() {
+            searchResults.innerHTML = '';
+            
+            if (channels.length === 0) {
+                searchResults.innerHTML = '<div class="user-item">Каналы не найдены</div>';
+                return;
+            }
+            
+            channels.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+                
+                const isSubscribed = subscribedChannels.includes(channel.id);
+                
+                channelItem.innerHTML = `
+                    <div class="channel-icon">📢</div>
+                    <div class="channel-info">
+                        <h3>${channel.name}</h3>
+                        <p>${channel.description || 'Нет описания'}</p>
+                        <div class="channel-subscribers">
+                            <span>👤 ${channel.subscribers ? channel.subscribers.length : 0}</span>
+                        </div>
+                    </div>
+                    <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" data-channel-id="${channel.id}">
+                        ${isSubscribed ? 'Отписаться' : 'Подписаться'}
+                    </button>
+                `;
+                
+                // Обработчик подписки/отписки
+                const subscribeBtn = channelItem.querySelector('.subscribe-btn');
+                subscribeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleSubscribe(channel.id);
+                });
+                
+                // Обработчик открытия канала
+                channelItem.addEventListener('click', () => {
+                    if (isSubscribed) {
+                        openChannelChat(channel.id, channel.name);
+                    } else {
+                        showNotification('Подпишитесь на канал, чтобы просматривать сообщения');
+                    }
+                });
+                
+                searchResults.appendChild(channelItem);
+            });
+        }
+        
+        async function toggleSubscribe(channelId) {
+            try {
+                const isSubscribed = subscribedChannels.includes(channelId);
+                
+                if (isSubscribed) {
+                    // Отписка
+                    subscribedChannels = subscribedChannels.filter(id => id !== channelId);
+                    showNotification('Вы отписались от канала');
+                } else {
+                    // Подписка
+                    subscribedChannels.push(channelId);
+                    showNotification('Вы подписались на канал');
+                }
+                
+                // Обновляем данные пользователя
+                await updateSubscribedChannels();
+                
+                // Обновляем данные канала
+                const channel = channels.find(c => c.id === channelId);
+                if (channel) {
+                    if (isSubscribed) {
+                        channel.subscribers = channel.subscribers.filter(sub => sub !== currentUser);
+                    } else {
+                        if (!channel.subscribers) {
+                            channel.subscribers = [];
+                        }
+                        channel.subscribers.push(currentUser);
+                    }
+                    
+                    await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            subscribers: channel.subscribers
+                        })
+                    });
+                }
+                
+                // Обновляем отображение
+                if (activeTab === 'channels') {
+                    loadChannels();
+                } else if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function updateSubscribedChannels() {
+            try {
+                await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        subscribedChannels: subscribedChannels
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка обновления подписанных каналов:', error);
+            }
+        }
+        
+        async function loadSubscribedChannels() {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных пользователя');
+                
+                const userData = await response.json();
+                if (userData && userData.subscribedChannels) {
+                    subscribedChannels = userData.subscribedChannels;
+                } else {
+                    subscribedChannels = [];
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки подписанных каналов:', error);
+                subscribedChannels = [];
+            }
+        }
+        
+        async function unsubscribeFromChannel(channelId) {
+            subscribedChannels = subscribedChannels.filter(id => id !== channelId);
+            await updateSubscribedChannels();
+            
+            // Обновляем данные канала
+            const channel = channels.find(c => c.id === channelId);
+            if (channel) {
+                channel.subscribers = channel.subscribers.filter(sub => sub !== currentUser);
+                
+                await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        subscribers: channel.subscribers
+                    })
+                });
+            }
+        }
+        
+        function openChannelChat(channelId, channelName) {
+            // Закрываем сайдбар на мобильных
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                mobileTitle.textContent = channelName;
+            }
+            
+            // Очищаем предыдущие слушатели
+            if (currentChat && messageListeners[currentChat]) {
+                clearInterval(messageListeners[currentChat]);
+            }
+            
+            currentChat = channelId;
+            currentChatType = 'channel';
+            currentChannel = channels.find(c => c.id === channelId);
+            currentGroup = null;
+            emptyState.style.display = 'none';
+            chatHeader.style.display = 'flex';
+            chatMessages.style.display = 'block';
+            messageInputContainer.style.display = 'flex';
+            
+            // Обновляем имя канала
+            chatUserEmoji.textContent = '📢';
+            chatUserName.querySelector('span:last-child').textContent = channelName;
+            chatAvatar.textContent = '📢';
+            
+            // Скрываем кнопку блокировки для каналов
+            blockUserBtn.style.display = 'none';
+            groupSettingsBtn.style.display = 'none';
+            
+            // Показываем кнопку настроек канала, если пользователь является создателем
+            if (currentChannel && currentChannel.creator === currentUser) {
+                channelSettingsBtn.style.display = 'block';
+            } else {
+                channelSettingsBtn.style.display = 'none';
+            }
+            
+            // Настройка поля ввода для мобильных
+            adjustMessageInput();
+            
+            loadMessages();
+            
+            // Устанавливаем периодическую проверку новых сообщений
+            messageListeners[channelId] = setInterval(() => {
+                loadMessages();
+            }, 3000);
+        }
+        
+        async function openChannelSettings() {
+            if (!currentChannel) return;
+            
+            editChannelNameInput.value = currentChannel.name;
+            editChannelDescriptionInput.value = currentChannel.description || '';
+            
+            channelSettingsModal.classList.add('active');
+        }
+        
+        function closeChannelSettings() {
+            channelSettingsModal.classList.remove('active');
+        }
+        
+        async function saveChannelSettings() {
+            if (!currentChannel) return;
+            
+            const newName = editChannelNameInput.value.trim();
+            const newDescription = editChannelDescriptionInput.value.trim();
+            
+            if (!newName) {
+                showNotification('Пожалуйста, введите название канала');
+                return;
+            }
+            
+            try {
+                // Обновляем данные канала
+                await fetch(`${firebaseURL}channels/${currentChannel.id}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        name: newName,
+                        description: newDescription
+                    })
+                });
+                
+                // Обновляем текущий канал
+                currentChannel.name = newName;
+                currentChannel.description = newDescription;
+                
+                // Обновляем заголовок чата
+                chatUserName.querySelector('span:last-child').textContent = newName;
+                
+                showNotification('Настройки канала сохранены');
+                closeChannelSettings();
+                
+                // Обновляем список каналов
+                loadChannels();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function unsubscribeChannel() {
+            if (!currentChannel) return;
+            
+            if (confirm('Вы уверены, что хотите отписаться от этого канала?')) {
+                try {
+                    await unsubscribeFromChannel(currentChannel.id);
+                    
+                    showNotification('Вы отписались от канала');
+                    closeChannelSettings();
+                    closeChat();
+                    
+                    // Обновляем список каналов
+                    loadChannels();
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
+            }
         }
         
         // Обработка закрытия вкладки/приложения
