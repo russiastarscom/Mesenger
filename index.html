@@ -617,7 +617,8 @@
         }
         
         .settings-btn {
-            width: 100%;
+            width: calc(100% - 24px);
+            margin: 0 12px;
             padding: 10px;
             background: var(--primary-color);
             color: white;
@@ -636,7 +637,8 @@
         }
         
         .logout-btn {
-            width: 100%;
+            width: calc(100% - 24px);
+            margin: 0 12px;
             padding: 10px;
             background: var(--danger-color);
             color: white;
@@ -1010,6 +1012,8 @@
             
             .message-content {
                 max-width: 75%;
+                word-break: break-word;
+                overflow-wrap: break-word;
             }
             
             .message-input {
@@ -3255,6 +3259,12 @@
             chatMessages.style.display = 'none';
             messageInputContainer.style.display = 'none';
             mobileTitle.textContent = 'Twin';
+            sidebar.classList.add('active');
+        } else {
+            emptyState.style.display = 'flex';
+            chatHeader.style.display = 'none';
+            chatMessages.style.display = 'none';
+            messageInputContainer.style.display = 'none';
         }
         
         // Очищаем слушатель для этого чата
@@ -3377,7 +3387,7 @@
             messagesHTML += `
                 <div class="message ${isSent ? 'sent' : 'received'}">
                     ${senderName}
-                    <div class="message-content">${message.text}${editedMark}</div>
+                    <div class="message-content">${escapeHtml(message.text)}${editedMark}</div>
                     <div class="message-time">${timeString}</div>
                     ${actionsHTML}
                 </div>
