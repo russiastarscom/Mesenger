@@ -58,6 +58,7 @@
             touch-action: manipulation;
         }
         
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -994,7 +995,7 @@
                 z-index: 100;
                 transform: translateX(-100%);
                 width: 280px;
-                height: 100vh;
+                height: 98vh;
             }
             
             .sidebar.active {
@@ -1114,6 +1115,7 @@
                 </div>
                 
                 <div class="settings">
+                    <button class="settings-btn" id="profile-settings-btn">Настройки профиля</button>          
                     <button class="settings-btn" id="settings-btn">Настройки</button>
                     <button class="logout-btn" id="logout-btn">Выйти</button>
                 </div>
@@ -1221,7 +1223,33 @@
             </div>
         </div>
     </div>
-    
+    <!-- Модальное окно настроек профиля -->
+<div class="modal" id="profile-settings-modal">
+    <div class="modal-content">
+        <h2 class="modal-title">Настройки профиля</h2>
+        
+        <input type="text" class="modal-input" id="profile-username-input" placeholder="Новый никнейм">
+        
+        <div class="emoji-selector">
+            <label>Ваш статус:</label>
+            <div class="emoji-options" id="profile-emoji-options">
+                <span class="emoji-option" data-emoji="😊">😊</span>
+                <span class="emoji-option" data-emoji="😎">😎</span>
+                <span class="emoji-option" data-emoji="🤔">🤔</span>
+                <span class="emoji-option" data-emoji="😴">😴</span>
+                <span class="emoji-option" data-emoji="😢">😢</span>
+                <span class="emoji-option" data-emoji="😡">😡</span>
+                <span class="emoji-option" data-emoji="🥳">🥳</span>
+                <span class="emoji-option" data-emoji="😍">😍</span>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary" id="cancel-profile-settings-btn">Отмена</button>
+            <button class="modal-btn modal-btn-primary" id="save-profile-settings-btn">Сохранить</button>
+        </div>
+    </div>
+</div>
     <!-- Модальное окно создания группы -->
     <div class="modal" id="create-group-modal">
         <div class="modal-content">
@@ -1494,13 +1522,119 @@
             });
         }
         
+        function openProfileSettings() {
+    // Заполняем поля текущими значениями
+    document.getElementById('profile-username-input').value = currentUser || '';
+    
+    // Устанавливаем текущий эмодзи
+    document.querySelectorAll('#profile-emoji-options .emoji-option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.emoji === userEmoji) {
+            opt.classList.add('selected');
+        }
+    });
+    
+    // Показываем модальное окно
+    document.getElementById('profile-settings-modal').classList.add('active');
+}
+
+// Закрытие модального окна настроек профиля
+function closeProfileSettings() {
+    document.getElementById('profile-settings-modal').classList.remove('active');
+}
+
+// Сохранение настроек профиля
+async function saveProfileSettings() {
+    const newUsername = document.getElementById('profile-username-input').value.trim();
+    
+    if (!newUsername) {
+        showNotification('Пожалуйста, введите новый никнейм');
+        return;
+    }
+    
+    if (newUsername === currentUser && userEmoji === userEmojiEl.textContent) {
+        showNotification('Изменений нет');
+        closeProfileSettings();
+        return;
+    }
+    
+    try {
+        // Если никнейм изменился
+        if (newUsername !== currentUser) {
+            // Проверяем, существует ли уже пользователь с таким именем
+            const response = await fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`);
+            if (!response.ok) throw new Error('Ошибка проверки имени');
+            
+            const userExists = await response.json();
+            if (userExists) {
+                showNotification('Этот никнейм уже занят');
+                return;
+            }
+            
+            // Обновляем данные пользователя в Firebase
+            await Promise.all([
+                // Удаляем старые данные пользователя
+                fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'DELETE'
+                }),
+                
+                // Создаем новые данные пользователя
+                fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        nickname: newUsername,
+                        emoji: userEmoji,
+                        online: true,
+                        lastSeen: Date.now(),
+                        blockedUsers: blockedUsers,
+                        subscribedChannels: subscribedChannels
+                    })
+                })
+            ]);
+            
+            // Обновляем текущего пользователя
+            localStorage.setItem('messenger_user', newUsername);
+            currentUser = newUsername;
+            currentUserEl.querySelector('span:last-child').textContent = newUsername;
+        } else {
+            // Если изменился только эмодзи
+            await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    emoji: userEmoji
+                })
+            });
+        }
+        
+        // Обновляем эмодзи в интерфейсе
+        userEmojiEl.textContent = userEmoji;
+        
+        showNotification('Настройки профиля сохранены');
+        closeProfileSettings();
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
+    }
+}
+        
         function setupEventListeners() {
-            // Поиск пользователей
+        // Выбор эмодзи в настройках профиля
+document.getElementById('profile-emoji-options').addEventListener('click', (e) => {
+    if (e.target.classList.contains('emoji-option')) {
+        document.querySelectorAll('#profile-emoji-options .emoji-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        e.target.classList.add('selected');
+        userEmoji = e.target.dataset.emoji;
+    }
+});
+            // Поиск поьзователей
             searchInput.addEventListener('input', debounce(handleSearch, 300));
             
             // Отправка сообщения
             sendBtn.addEventListener('click', sendMessage);
-            messageText.addEventListener('keypress', (e) => {
+           
+             messageText.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendMessage();
             });
             
@@ -1510,7 +1644,18 @@
                     scrollToBottom();
                 }, 300);
             });
-            
+// Обработка кликов по ссылкам в сообщениях
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('channel-link')) {
+        e.preventDefault();
+        const channelId = e.target.dataset.channelId;
+        openChannelFromLink(channelId);
+    } else if (e.target.classList.contains('group-link')) {
+        e.preventDefault();
+        const groupId = e.target.dataset.groupId;
+        openGroupFromLink(groupId);
+    }
+});            
             // Выход из системы
             logoutBtn.addEventListener('click', handleLogout);
             logoutMenuBtn.addEventListener('click', handleLogout);
@@ -1519,7 +1664,10 @@
             settingsBtn.addEventListener('click', toggleSettingsMenu);
             cancelSettingsBtn.addEventListener('click', closeSettings);
             saveSettingsBtn.addEventListener('click', saveSettings);
-            
+           
+            document.getElementById('profile-settings-btn').addEventListener('click', openProfileSettings);
+            document.getElementById('cancel-profile-settings-btn').addEventListener('click', closeProfileSettings);
+            document.getElementById('save-profile-settings-btn').addEventListener('click', saveProfileSettings); 
             // Создание группы
             createGroupBtn.addEventListener('click', openCreateGroup);
             cancelGroupBtn.addEventListener('click', closeCreateGroup);
@@ -1602,7 +1750,7 @@
             window.addEventListener('offline', () => {
                 isOnline = false;
                 updateConnectionStatus();
-                showNotification('Вы в оффлайн режиме');
+                showNotification('Вы не в сети');
             });
         }
         
@@ -3302,11 +3450,11 @@
             }
         }
         
-        function displayMessages(messages) {
-            chatMessages.innerHTML = '';
-            
-            if (!messages) {
-                chatMessages.innerHTML = '<div class="message"><div class="message-content">Нет сообщений</div></div>';
+        function displayMessages(messages, autoScroll = true) {
+    chatMessages.innerHTML = '';
+    
+    if (!messages) {
+        chatMessages.innerHTML = '<div class="message"><div class="message-content">Нет сообщений</div></div>';
                 return;
             }
             
@@ -3409,17 +3557,52 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-        
         function scrollToBottom() {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // На мобильных добавляем небольшую задержку для плавности
-            if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 100);
-            }
+    // Проверяем, находимся ли мы уже внизу или близко к низу
+    const isScrolledToBottom = chatMessages.scrollHeight - chatMessages.clientHeight <= chatMessages.scrollTop + 50;
+    
+    // Прокручиваем вниз только если мы уже были внизу или это новый чат
+    if (isScrolledToBottom || !currentChat) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // На мобильных добавляем небольшую задержку для плавности
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
         }
+    }
+}
+async function loadMessages() {
+    if (!currentChat) return;
+    
+    try {
+        let chatId;
+        if (currentChatType === 'group' || currentChatType === 'channel') {
+            chatId = currentChat;
+        } else {
+            chatId = getChatId(currentUser, currentChat);
+        }
+        
+        const response = await fetch(`${firebaseURL}messages/${chatId}.json`);
+        
+        if (!response.ok) throw new Error('Ошибка при загрузке сообщений');
+        
+        const messages = await response.json();
+        
+        // Для каналов не прокручиваем автоматически, если пользователь не внизу
+        if (currentChatType === 'channel') {
+            displayMessages(messages, false); // false = не прокручивать автоматически
+        } else {
+            displayMessages(messages, true); // true = прокручивать автоматически
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки сообщений:', error);
+        showNotification('Ошибка загрузки сообщений: ' + error.message);
+    }
+}
+        
+       
         
         async function sendMessage() {
             const text = messageText.value.trim();
@@ -3969,3 +4152,23 @@
     </script>
 </body>
 </html>
+
+n: Date.now() }));
+            }
+        });
+    </script>
+</body>
+</html>
+
+lse, lastSeen: Date.now() }));
+            }
+        });
+    </script>
+</body>
+</html>
+
+   });
+    </script>
+</body>
+</html>
+
