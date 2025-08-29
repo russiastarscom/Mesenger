@@ -1,0 +1,4174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height">
+    <title>Twin</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --primary-dark: #5a4fcf;
+            --danger-color: #e74c3c;
+            --danger-dark: #c0392b;
+            --success-color: #2ecc71;
+            --success-dark: #27ae60;
+            --text-color: #2d3436;
+            --text-light: #636e72;
+            --bg-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --sent-message: #6c5ce7;
+            --received-message: #ffffff;
+            --message-hover: #f5f5f5;
+            --modal-bg: #ffffff;
+            --input-bg: #ffffff;
+            --sidebar-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --online-color: #2ecc71;
+            --offline-color: #e74c3c;
+            --notification-bg: #6c5ce7;
+            --notification-text: #ffffff;
+            --channel-bg: #f0f3ff;
+            --channel-hover: #e1e6ff;
+        }
+        
+        /* Темная тема */
+        body.dark-theme {
+            --bg-color: #1e1e1e;
+            --text-color: #f0f0f0;
+            --text-light: #b0b0b0;
+            --border-color: #444444;
+            --sent-message: #5a4fcf;
+            --received-message: #2d2d2d;
+            --message-hover: #333333;
+            --modal-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --sidebar-bg: #1e1e1e;
+            --header-bg: #2d2d2d;
+            --notification-bg: #5a4fcf;
+            --notification-text: #f0f0f0;
+            --channel-bg: #2a2a4a;
+            --channel-hover: #3a3a5a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s;
+            -webkit-overflow-scrolling: touch;
+            will-change: transform;
+        }
+        
+        .mobile-header {
+            display: none;
+            padding: 12px 15px;
+            background: var(--primary-color);
+            color: white;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-header h1 {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            will-change: transform;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            will-change: transform;
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+        }
+        
+        .user-profile {
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .user-profile h2 {
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-emoji {
+            font-size: 1.5rem;
+            margin-right: 5px;
+        }
+        
+        .user-profile p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connection-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 5px;
+            background-color: var(--online-color);
+        }
+        
+        .connection-status.offline {
+            background-color: var(--offline-color);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--sidebar-bg);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            transition: all 0.2s;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .search-container {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--sidebar-bg);
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            outline: none;
+            background: var(--input-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .search-results {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .user-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .user-item:active {
+            background: var(--message-hover);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .user-info {
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .user-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-emoji-small {
+            font-size: 1rem;
+            margin-right: 5px;
+        }
+        
+        .user-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-preview {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-preview .last-message {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-preview .last-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            align-self: flex-end;
+        }
+        
+        .chat-actions {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .user-item:hover .chat-actions {
+            opacity: 1;
+        }
+        
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px;
+            margin-left: 5px;
+        }
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 100%;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .chat-header {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--header-bg);
+            z-index: 10;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .chat-header h2 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-left: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            margin-right: 10px;
+            display: none;
+            cursor: pointer;
+            color: var(--text-color);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-header-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .chat-header-btn:hover {
+            background: var(--message-hover);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: var(--bg-color);
+            padding-bottom: 80px;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .message {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .message.sent {
+            align-items: flex-end;
+        }
+        
+        .message.received {
+            align-items: flex-start;
+        }
+        
+        .message-content {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            will-change: transform;
+            transform: translateZ(0);
+            overflow-wrap: break-word;
+            word-break: break-word;
+            overflow: hidden;
+        }
+        
+        .message.sent .message-content {
+            background: var(--sent-message);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.received .message-content {
+            background: var(--received-message);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        
+        .message-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+        
+        .message-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px;
+            margin-left: 5px;
+        }
+        
+        .message-input {
+            padding: 12px 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            background: var(--header-bg);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        .message-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.95rem;
+            outline: none;
+            background: var(--input-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .message-input button {
+            margin-left: 8px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .message-input button:active {
+            background: var(--primary-dark);
+        }
+        
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--notification-bg);
+            color: var(--notification-text);
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+            will-change: transform, opacity;
+            transform: translateX(-50%) translateY(100px) translateZ(0);
+        }
+        
+        .notification.show {
+            transform: translateX(-50%) translateY(0) translateZ(0);
+            opacity: 1;
+        }
+        
+        .settings {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            position: sticky;
+            bottom: 0;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .settings-btn {
+            width: calc(100% - 24px);
+            margin: 0 12px;
+            padding: 10px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .settings-btn:active {
+            background: var(--primary-dark);
+        }
+        
+        .logout-btn {
+            width: calc(100% - 24px);
+            margin: 0 12px;
+            padding: 10px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .logout-btn:active {
+            background: var(--danger-dark);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            will-change: opacity;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background: var(--modal-bg);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            color: var(--text-color);
+            max-height: 90vh;
+            overflow-y: auto;
+            will-change: transform;
+            transform: translateY(20px) translateZ(0);
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0) translateZ(0);
+        }
+        
+        .modal-title {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .modal-btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .modal-btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .theme-toggle label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .theme-toggle input {
+            margin-right: 10px;
+        }
+        
+        .emoji-selector {
+            margin-bottom: 15px;
+        }
+        
+        .emoji-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .emoji-option {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .emoji-option:hover {
+            background: var(--message-hover);
+        }
+        
+        .emoji-option.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .group-participants {
+            margin-bottom: 15px;
+        }
+        
+        .participants-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .participant-item:last-child {
+            border-bottom: none;
+        }
+        
+        .participant-checkbox {
+            margin-right: 10px;
+        }
+        
+        .blocked-users {
+            margin-top: 15px;
+        }
+        
+        .blocked-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .blocked-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .blocked-item:last-child {
+            border-bottom: none;
+        }
+        
+        .unblock-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        /* Стили для каналов */
+        .channel-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: var(--channel-bg);
+        }
+        
+        .channel-item:active {
+            background: var(--channel-hover);
+        }
+        
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+        
+        .channel-info {
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .channel-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+        
+        .channel-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .channel-subscribers {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .subscribe-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .subscribe-btn:active {
+            background: var(--primary-dark);
+        }
+        
+        .subscribe-btn.subscribed {
+            background: var(--text-light);
+            color: var(--text-color);
+        }
+        
+        /* Стили для меню настроек */
+        .settings-menu {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--modal-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: 200px;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .settings-menu.active {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .settings-menu-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .settings-menu-item:hover {
+            background: var(--message-hover);
+        }
+        
+        .settings-menu-item.create-group {
+            color: var(--success-color);
+        }
+        
+        .settings-menu-item.create-channel {
+            color: var(--primary-color);
+        }
+        
+        .settings-menu-item.logout {
+            color: var(--danger-color);
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+            
+            .sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 100;
+                transform: translateX(-100%);
+                width: 280px;
+                height: 98vh;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            
+            .back-btn {
+                display: block;
+            }
+            
+            .chat-header h2 {
+                max-width: calc(100% - 80px);
+            }
+            
+            .message-content {
+                max-width: 75%;
+                word-break: break-word;
+                overflow-wrap: break-word;
+            }
+            
+            .message-input {
+                padding: 10px;
+                height: auto;
+            }
+            
+            .message-input input {
+                padding: 10px 12px;
+                font-size: 16px;
+            }
+            
+            .message-input button {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .chat-messages {
+                padding-bottom: 80px;
+            }
+            
+            .settings-menu {
+                bottom: 90px;
+                right: 10px;
+                width: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .user-profile {
+                padding: 12px 10px;
+            }
+            
+            .user-profile h2 {
+                font-size: 1.1rem;
+            }
+            
+            .chat-messages {
+                padding: 10px;
+                padding-bottom: 80px;
+            }
+            
+            .message-content {
+                max-width: 80%;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .message-input {
+                padding: 8px;
+            }
+            
+            .message-input input {
+                padding: 8px 12px;
+                font-size: 16px;
+            }
+            
+            .message-input button {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mobile-header">
+            <button class="mobile-menu-btn" id="menu-btn">☰</button>
+            <h1 id="mobile-title">Twin</h1>
+            <div style="width: 24px;"></div>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="sidebar" id="sidebar">
+                <div class="user-profile">
+                    <h2 id="current-user">
+                        <span class="user-emoji" id="user-emoji">😊</span>
+                        <span>Загрузка...</span>
+                    </h2>
+                    <p>
+                        Онлайн
+                        <span class="connection-status" id="connection-status"></span>
+                    </p>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab active" id="chats-tab">Чаты</button>
+                    <button class="tab" id="users-tab">Пользователи</button>
+                    <button class="tab" id="channels-tab">Каналы</button>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" class="search-box" id="search-input" placeholder="Поиск...">
+                </div>
+                
+                <div class="search-results" id="search-results">
+                    <!-- Результаты поиска будут здесь -->
+                </div>
+                
+                <div class="settings">
+                    <button class="settings-btn" id="profile-settings-btn">Настройки профиля</button>          
+                    <button class="settings-btn" id="settings-btn">Настройки</button>
+                    <button class="logout-btn" id="logout-btn">Выйти</button>
+                </div>
+            </div>
+            
+            <div class="chat-area">
+                <div class="empty-state" id="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <h3>Выберите чат</h3>
+                    <p>Найдите пользователя и начните общение</p>
+                </div>
+                
+                <div class="chat-header" id="chat-header" style="display: none;">
+                    <div class="chat-header-left">
+                        <button class="back-btn" id="back-btn">←</button>
+                        <div class="user-avatar" id="chat-avatar">?</div>
+                        <h2 id="chat-user-name">
+                            <span class="user-emoji-small" id="chat-user-emoji">😊</span>
+                            <span>Пользователь</span>
+                        </h2>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="chat-header-btn" id="close-chat-btn" title="Вернуться к списку чатов">←</button>
+                        <button class="chat-header-btn" id="block-user-btn" title="Заблокировать пользователя">🚫</button>
+                        <button class="chat-header-btn" id="delete-chat-btn" title="Удалить чат">🗑️</button>
+                        <button class="chat-header-btn" id="group-settings-btn" title="Настройки группы" style="display: none;">⚙️</button>
+                        <button class="chat-header-btn" id="channel-settings-btn" title="Настройки канала" style="display: none;">⚙️</button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages" style="display: none;">
+                    <!-- Сообщения будут здесь -->
+                </div>
+                
+                <div class="message-input" id="message-input-container" style="display: none;">
+                    <input type="text" id="message-text" placeholder="Введите сообщение..." autocomplete="off">
+                    <button id="send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Меню настроек -->
+    <div class="settings-menu" id="settings-menu">
+        <div class="settings-menu-item create-group" id="create-group-menu-btn">
+            <span>👥</span>
+            <span>Создать группу</span>
+        </div>
+        <div class="settings-menu-item create-channel" id="create-channel-menu-btn">
+            <span>📢</span>
+            <span>Создать канал</span>
+        </div>
+        <div class="settings-menu-item logout" id="logout-menu-btn">
+            <span>🚪</span>
+            <span>Выйти</span>
+        </div>
+    </div>
+    
+    <!-- Модальное окно уведомлений -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Модальное окно настроек -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Настройки</h2>
+            
+            <div class="theme-toggle">
+                <label>
+                    <input type="checkbox" id="theme-toggle">
+                    <span>Темная тема</span>
+                </label>
+            </div>
+            
+            <div class="emoji-selector">
+                <label>Ваш статус:</label>
+                <div class="emoji-options" id="emoji-options">
+                    <span class="emoji-option" data-emoji="😊">😊</span>
+                    <span class="emoji-option" data-emoji="😎">😎</span>
+                    <span class="emoji-option" data-emoji="🤔">🤔</span>
+                    <span class="emoji-option" data-emoji="😴">😴</span>
+                    <span class="emoji-option" data-emoji="😢">😢</span>
+                    <span class="emoji-option" data-emoji="😡">😡</span>
+                    <span class="emoji-option" data-emoji="🥳">🥳</span>
+                    <span class="emoji-option" data-emoji="😍">😍</span>
+                </div>
+            </div>
+            
+            <div class="blocked-users">
+                <label>Заблокированные пользователи:</label>
+                <div class="blocked-list" id="blocked-list">
+                    <!-- Список заблокированных пользователей -->
+                </div>
+            </div>
+            
+            <input type="text" class="modal-input" id="new-username-input" placeholder="Новый никнейм">
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-settings-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-settings-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно настроек профиля -->
+<div class="modal" id="profile-settings-modal">
+    <div class="modal-content">
+        <h2 class="modal-title">Настройки профиля</h2>
+        
+        <input type="text" class="modal-input" id="profile-username-input" placeholder="Новый никнейм">
+        
+        <div class="emoji-selector">
+            <label>Ваш статус:</label>
+            <div class="emoji-options" id="profile-emoji-options">
+                <span class="emoji-option" data-emoji="😊">😊</span>
+                <span class="emoji-option" data-emoji="😎">😎</span>
+                <span class="emoji-option" data-emoji="🤔">🤔</span>
+                <span class="emoji-option" data-emoji="😴">😴</span>
+                <span class="emoji-option" data-emoji="😢">😢</span>
+                <span class="emoji-option" data-emoji="😡">😡</span>
+                <span class="emoji-option" data-emoji="🥳">🥳</span>
+                <span class="emoji-option" data-emoji="😍">😍</span>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary" id="cancel-profile-settings-btn">Отмена</button>
+            <button class="modal-btn modal-btn-primary" id="save-profile-settings-btn">Сохранить</button>
+        </div>
+    </div>
+</div>
+    <!-- Модальное окно создания группы -->
+    <div class="modal" id="create-group-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Создание группы</h2>
+            
+            <input type="text" class="modal-input" id="group-name-input" placeholder="Название группы">
+            
+            <div class="group-participants">
+                <label>Участники группы:</label>
+                <div class="participants-list" id="participants-list">
+                    <!-- Список участников -->
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-group-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="create-group-confirm-btn">Создать</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно создания канала -->
+    <div class="modal" id="create-channel-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Создание канала</h2>
+            
+            <input type="text" class="modal-input" id="channel-name-input" placeholder="Название канала">
+            <textarea class="modal-input" id="channel-description-input" rows="3" placeholder="Описание канала"></textarea>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-channel-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="create-channel-confirm-btn">Создать</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно редактирования сообщения -->
+    <div class="modal" id="edit-message-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Редактирование сообщения</h2>
+            <textarea class="modal-input" id="edit-message-text" rows="3" placeholder="Текст сообщения"></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-edit-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-edit-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно настроек группы -->
+    <div class="modal" id="group-settings-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Настройки группы</h2>
+            
+            <input type="text" class="modal-input" id="edit-group-name-input" placeholder="Название группы">
+            
+            <div class="group-participants">
+                <label>Участники группы:</label>
+                <div class="participants-list" id="edit-participants-list">
+                    <!-- Список участников -->
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-group-settings-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-group-settings-btn">Сохранить</button>
+                <button class="modal-btn" id="leave-group-btn" style="background: var(--danger-color); color: white;">Покинуть группу</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно настроек канала -->
+    <div class="modal" id="channel-settings-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Настройки канала</h2>
+            
+            <input type="text" class="modal-input" id="edit-channel-name-input" placeholder="Название канала">
+            <textarea class="modal-input" id="edit-channel-description-input" rows="3" placeholder="Описание канала"></textarea>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-channel-settings-btn">Отмена</button>
+                <button class="modal-btn modal-btn-primary" id="save-channel-settings-btn">Сохранить</button>
+                <button class="modal-btn" id="unsubscribe-channel-btn" style="background: var(--danger-color); color: white;">Отписаться</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Конфигурация Firebase
+        const firebaseURL = 'https://partner-e9406-default-rtdb.firebaseio.com/';
+        
+        // Элементы DOM
+        const currentUserEl = document.getElementById('current-user');
+        const userEmojiEl = document.getElementById('user-emoji');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const emptyState = document.getElementById('empty-state');
+        const chatHeader = document.getElementById('chat-header');
+        const chatAvatar = document.getElementById('chat-avatar');
+        const chatUserName = document.getElementById('chat-user-name');
+        const chatUserEmoji = document.getElementById('chat-user-emoji');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInputContainer = document.getElementById('message-input-container');
+        const messageText = document.getElementById('message-text');
+        const sendBtn = document.getElementById('send-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const notification = document.getElementById('notification');
+        const menuBtn = document.getElementById('menu-btn');
+        const backBtn = document.getElementById('back-btn');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileTitle = document.getElementById('mobile-title');
+        const settingsModal = document.getElementById('settings-modal');
+        const newUsernameInput = document.getElementById('new-username-input');
+        const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const chatsTab = document.getElementById('chats-tab');
+        const usersTab = document.getElementById('users-tab');
+        const channelsTab = document.getElementById('channels-tab');
+        const themeToggle = document.getElementById('theme-toggle');
+        const emojiOptions = document.getElementById('emoji-options');
+        const editMessageModal = document.getElementById('edit-message-modal');
+        const editMessageText = document.getElementById('edit-message-text');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const createGroupBtn = document.getElementById('create-group-menu-btn');
+        const createGroupModal = document.getElementById('create-group-modal');
+        const groupNameInput = document.getElementById('group-name-input');
+        const participantsList = document.getElementById('participants-list');
+        const cancelGroupBtn = document.getElementById('cancel-group-btn');
+        const createGroupConfirmBtn = document.getElementById('create-group-confirm-btn');
+        const blockUserBtn = document.getElementById('block-user-btn');
+        const deleteChatBtn = document.getElementById('delete-chat-btn');
+        const connectionStatus = document.getElementById('connection-status');
+        const blockedList = document.getElementById('blocked-list');
+        const groupSettingsBtn = document.getElementById('group-settings-btn');
+        const groupSettingsModal = document.getElementById('group-settings-modal');
+        const editGroupNameInput = document.getElementById('edit-group-name-input');
+        const editParticipantsList = document.getElementById('edit-participants-list');
+        const cancelGroupSettingsBtn = document.getElementById('cancel-group-settings-btn');
+        const saveGroupSettingsBtn = document.getElementById('save-group-settings-btn');
+        const leaveGroupBtn = document.getElementById('leave-group-btn');
+        const createChannelBtn = document.getElementById('create-channel-menu-btn');
+        const createChannelModal = document.getElementById('create-channel-modal');
+        const channelNameInput = document.getElementById('channel-name-input');
+        const channelDescriptionInput = document.getElementById('channel-description-input');
+        const cancelChannelBtn = document.getElementById('cancel-channel-btn');
+        const createChannelConfirmBtn = document.getElementById('create-channel-confirm-btn');
+        const channelSettingsBtn = document.getElementById('channel-settings-btn');
+        const channelSettingsModal = document.getElementById('channel-settings-modal');
+        const editChannelNameInput = document.getElementById('edit-channel-name-input');
+        const editChannelDescriptionInput = document.getElementById('edit-channel-description-input');
+        const cancelChannelSettingsBtn = document.getElementById('cancel-channel-settings-btn');
+        const saveChannelSettingsBtn = document.getElementById('save-channel-settings-btn');
+        const unsubscribeChannelBtn = document.getElementById('unsubscribe-channel-btn');
+        const settingsMenu = document.getElementById('settings-menu');
+        const logoutMenuBtn = document.getElementById('logout-menu-btn');
+        
+        // Состояние приложения
+        let currentUser = null;
+        let currentChat = null;
+        let currentChatType = null; // 'user', 'group', 'channel'
+        let messageListeners = {};
+        let activeTab = 'chats';
+        let userEmoji = '😊';
+        let editingMessageId = null;
+        let isOnline = navigator.onLine;
+        let blockedUsers = [];
+        let groups = [];
+        let currentGroup = null;
+        let channels = [];
+        let currentChannel = null;
+        let subscribedChannels = [];
+        let lastMessageTimestamp = 0;
+        let notificationSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        async function initApp() {
+            setupEventListeners();
+            setupNetworkStatus();
+            
+            // Проверяем сохраненную тему
+            if (localStorage.getItem('dark_theme') === 'true') {
+                document.body.classList.add('dark-theme');
+                themeToggle.checked = true;
+            }
+            
+            // Проверяем, есть ли сохраненный пользователь
+            const savedUser = localStorage.getItem('messenger_user');
+            if (savedUser) {
+                currentUser = savedUser;
+                
+                // Загружаем данные пользователя
+                await loadUserData();
+                await loadBlockedUsers();
+                await loadSubscribedChannels();
+                
+                currentUserEl.querySelector('span:last-child').textContent = currentUser;
+                await updateUserStatus(true);
+                loadRecentChats();
+                loadGroups();
+                loadChannels();
+                
+                // Запускаем проверку новых сообщений и уведомлений
+                startBackgroundChecks();
+            } else {
+                // Если пользователя нет, запрашиваем никнейм
+                requestUsername();
+            }
+            
+            // Адаптация для мобильных
+            if (window.innerWidth <= 768) {
+                mobileTitle.textContent = 'Twin';
+            }
+            
+            // Инициализация поля ввода
+            adjustMessageInput();
+            
+            // Оптимизация для Android
+            optimizeForAndroid();
+        }
+        
+        function optimizeForAndroid() {
+            // Оптимизация производительности для Android
+            if ('ontouchstart' in window) {
+                // Добавляем класс для устройств с сенсорным экраном
+                document.body.classList.add('touch-device');
+                
+                // Оптимизация прокрутки
+                document.querySelectorAll('.search-results, .chat-messages, .participants-list, .blocked-list').forEach(element => {
+                    element.style.webkitOverflowScrolling = 'touch';
+                });
+                
+                // Оптимизация обработки касаний
+                document.querySelectorAll('button, .user-item, .channel-item, .tab, .chat-header-btn').forEach(element => {
+                    element.addEventListener('touchstart', function() {
+                        this.style.opacity = '0.8';
+                    }, { passive: true });
+                    
+                    element.addEventListener('touchend', function() {
+                        this.style.opacity = '1';
+                    }, { passive: true });
+                });
+            }
+            
+            // Предотвращение двойного касания для увеличения
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Оптимизация для виртуальной клавиатуры Android
+            const viewport = document.querySelector('meta[name=viewport]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height, viewport-fit=cover');
+            }
+            
+            // Предотвращение масштабирования при фокусе на поле ввода
+            messageText.addEventListener('focus', function() {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                }, 100);
+            });
+        }
+        
+        function openProfileSettings() {
+    // Заполняем поля текущими значениями
+    document.getElementById('profile-username-input').value = currentUser || '';
+    
+    // Устанавливаем текущий эмодзи
+    document.querySelectorAll('#profile-emoji-options .emoji-option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.emoji === userEmoji) {
+            opt.classList.add('selected');
+        }
+    });
+    
+    // Показываем модальное окно
+    document.getElementById('profile-settings-modal').classList.add('active');
+}
+
+// Закрытие модального окна настроек профиля
+function closeProfileSettings() {
+    document.getElementById('profile-settings-modal').classList.remove('active');
+}
+
+// Сохранение настроек профиля
+async function saveProfileSettings() {
+    const newUsername = document.getElementById('profile-username-input').value.trim();
+    
+    if (!newUsername) {
+        showNotification('Пожалуйста, введите новый никнейм');
+        return;
+    }
+    
+    if (newUsername === currentUser && userEmoji === userEmojiEl.textContent) {
+        showNotification('Изменений нет');
+        closeProfileSettings();
+        return;
+    }
+    
+    try {
+        // Если никнейм изменился
+        if (newUsername !== currentUser) {
+            // Проверяем, существует ли уже пользователь с таким именем
+            const response = await fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`);
+            if (!response.ok) throw new Error('Ошибка проверки имени');
+            
+            const userExists = await response.json();
+            if (userExists) {
+                showNotification('Этот никнейм уже занят');
+                return;
+            }
+            
+            // Обновляем данные пользователя в Firebase
+            await Promise.all([
+                // Удаляем старые данные пользователя
+                fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'DELETE'
+                }),
+                
+                // Создаем новые данные пользователя
+                fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        nickname: newUsername,
+                        emoji: userEmoji,
+                        online: true,
+                        lastSeen: Date.now(),
+                        blockedUsers: blockedUsers,
+                        subscribedChannels: subscribedChannels
+                    })
+                })
+            ]);
+            
+            // Обновляем текущего пользователя
+            localStorage.setItem('messenger_user', newUsername);
+            currentUser = newUsername;
+            currentUserEl.querySelector('span:last-child').textContent = newUsername;
+        } else {
+            // Если изменился только эмодзи
+            await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    emoji: userEmoji
+                })
+            });
+        }
+        
+        // Обновляем эмодзи в интерфейсе
+        userEmojiEl.textContent = userEmoji;
+        
+        showNotification('Настройки профиля сохранены');
+        closeProfileSettings();
+        
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message);
+    }
+}
+        
+        function setupEventListeners() {
+        // Выбор эмодзи в настройках профиля
+document.getElementById('profile-emoji-options').addEventListener('click', (e) => {
+    if (e.target.classList.contains('emoji-option')) {
+        document.querySelectorAll('#profile-emoji-options .emoji-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        e.target.classList.add('selected');
+        userEmoji = e.target.dataset.emoji;
+    }
+});
+            // Поиск поьзователей
+            searchInput.addEventListener('input', debounce(handleSearch, 300));
+            
+            // Отправка сообщения
+            sendBtn.addEventListener('click', sendMessage);
+           
+             messageText.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            // Фокус на поле ввода для мобильных устройств
+            messageText.addEventListener('focus', () => {
+                setTimeout(() => {
+                    scrollToBottom();
+                }, 300);
+            });
+// Обработка кликов по ссылкам в сообщениях
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('channel-link')) {
+        e.preventDefault();
+        const channelId = e.target.dataset.channelId;
+        openChannelFromLink(channelId);
+    } else if (e.target.classList.contains('group-link')) {
+        e.preventDefault();
+        const groupId = e.target.dataset.groupId;
+        openGroupFromLink(groupId);
+    }
+});            
+            // Выход из системы
+            logoutBtn.addEventListener('click', handleLogout);
+            logoutMenuBtn.addEventListener('click', handleLogout);
+            
+            // Настройки
+            settingsBtn.addEventListener('click', toggleSettingsMenu);
+            cancelSettingsBtn.addEventListener('click', closeSettings);
+            saveSettingsBtn.addEventListener('click', saveSettings);
+           
+            document.getElementById('profile-settings-btn').addEventListener('click', openProfileSettings);
+            document.getElementById('cancel-profile-settings-btn').addEventListener('click', closeProfileSettings);
+            document.getElementById('save-profile-settings-btn').addEventListener('click', saveProfileSettings); 
+            // Создание группы
+            createGroupBtn.addEventListener('click', openCreateGroup);
+            cancelGroupBtn.addEventListener('click', closeCreateGroup);
+            createGroupConfirmBtn.addEventListener('click', createGroup);
+            
+            // Создание канала
+            createChannelBtn.addEventListener('click', openCreateChannel);
+            cancelChannelBtn.addEventListener('click', closeCreateChannel);
+            createChannelConfirmBtn.addEventListener('click', createChannel);
+            
+            // Настройки группы
+            groupSettingsBtn.addEventListener('click', openGroupSettings);
+            cancelGroupSettingsBtn.addEventListener('click', closeGroupSettings);
+            saveGroupSettingsBtn.addEventListener('click', saveGroupSettings);
+            leaveGroupBtn.addEventListener('click', leaveGroup);
+            
+            // Настройки канала
+            channelSettingsBtn.addEventListener('click', openChannelSettings);
+            cancelChannelSettingsBtn.addEventListener('click', closeChannelSettings);
+            saveChannelSettingsBtn.addEventListener('click', saveChannelSettings);
+            unsubscribeChannelBtn.addEventListener('click', unsubscribeChannel);
+            
+            // Переключение темы
+            themeToggle.addEventListener('change', toggleTheme);
+            
+            // Выбор эмодзи
+            emojiOptions.addEventListener('click', (e) => {
+                if (e.target.classList.contains('emoji-option')) {
+                    document.querySelectorAll('.emoji-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    e.target.classList.add('selected');
+                    userEmoji = e.target.dataset.emoji;
+                }
+            });
+            
+            // Редактирование сообщения
+            cancelEditBtn.addEventListener('click', closeEditMessage);
+            saveEditBtn.addEventListener('click', saveEditedMessage);
+            
+            // Мобильное меню
+            menuBtn.addEventListener('click', toggleSidebar);
+            backBtn.addEventListener('click', closeChat);
+            closeChatBtn.addEventListener('click', closeChat);
+            
+            // Закрытие сайдбара при клике вне его
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && !sidebar.contains(e.target) && 
+                    e.target !== menuBtn && !menuBtn.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+                
+                // Закрытие меню настроек при клике вне его
+                if (!settingsMenu.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)) {
+                    settingsMenu.classList.remove('active');
+                }
+            });
+            
+            // Обработка изменения размера экрана
+            window.addEventListener('resize', handleResize);
+            
+            // Переключение вкладок
+            chatsTab.addEventListener('click', () => switchTab('chats'));
+            usersTab.addEventListener('click', () => switchTab('users'));
+            channelsTab.addEventListener('click', () => switchTab('channels'));
+            
+            // Блокировка пользователя
+            blockUserBtn.addEventListener('click', toggleBlockUser);
+            
+            // Удаление чата
+            deleteChatBtn.addEventListener('click', deleteChat);
+            
+            // События для работы в сети/офлайн
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateConnectionStatus();
+                showNotification('Вы в сети');
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateConnectionStatus();
+                showNotification('Вы не в сети');
+            });
+        }
+        
+        function toggleSettingsMenu() {
+            settingsMenu.classList.toggle('active');
+        }
+        
+        function setupNetworkStatus() {
+            updateConnectionStatus();
+        }
+        
+        function updateConnectionStatus() {
+            if (isOnline) {
+                connectionStatus.classList.remove('offline');
+                document.querySelector('.user-profile p').innerHTML = 'Онлайн <span class="connection-status" id="connection-status"></span>';
+            } else {
+                connectionStatus.classList.add('offline');
+                document.querySelector('.user-profile p').innerHTML = 'Офлайн <span class="connection-status offline" id="connection-status"></span>';
+            }
+        }
+        
+        function startBackgroundChecks() {
+            // Проверка новых сообщений каждые 5 секунд
+            setInterval(checkForNewMessages, 5000);
+            
+            // Проверка уведомлений о добавлении в группу каждые 10 секунд
+            setInterval(checkForGroupInvites, 10000);
+            
+            // Проверка уведомлений о новых каналах каждые 15 секунд
+            setInterval(checkForChannelUpdates, 15000);
+        }
+        
+        async function checkForNewMessages() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все чаты пользователя
+                const response = await fetch(`${firebaseURL}messages.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке новых сообщений');
+                
+                const allChats = await response.json();
+                if (!allChats) return;
+                
+                // Проверяем каждый чат, где участвует текущий пользователь
+                Object.keys(allChats).forEach(chatId => {
+                    // Проверяем, что это чат текущего пользователя (личный или групповой)
+                    if (chatId.includes(currentUser) || (chatId.startsWith('group_') && groups.some(g => g.id === chatId)) || 
+                        (chatId.startsWith('channel_') && subscribedChannels.includes(chatId))) {
+                        const messages = allChats[chatId];
+                        const messagesArray = Object.keys(messages).map(key => ({
+                            id: key,
+                            ...messages[key]
+                        }));
+                        
+                        // Находим самое новое сообщение в чате
+                        const latestMessage = messagesArray
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
+                            latestMessage.sender !== currentUser && document.hidden) {
+                            
+                            // Определяем имя отправителя
+                            let senderName = latestMessage.sender;
+                            if (chatId.startsWith('group_')) {
+                                const group = groups.find(g => g.id === chatId);
+                                if (group) {
+                                    senderName = `${group.name}: ${latestMessage.sender}`;
+                                }
+                            } else if (chatId.startsWith('channel_')) {
+                                const channel = channels.find(c => c.id === chatId);
+                                if (channel) {
+                                    senderName = `${channel.name}: ${latestMessage.sender}`;
+                                }
+                            }
+                            
+                            // Показываем уведомление
+                            showNotification(`Новое сообщение от ${senderName}: ${truncate(latestMessage.text, 30)}`);
+                            playNotificationSound();
+                            
+                            // Обновляем время последнего сообщения
+                            lastMessageTimestamp = latestMessage.timestamp;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке новых сообщений:', error);
+            }
+        }
+        
+        async function checkForGroupInvites() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все группы
+                const response = await fetch(`${firebaseURL}groups.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке приглашений в группы');
+                
+                const allGroups = await response.json();
+                if (!allGroups) return;
+                
+                // Проверяем каждую группу
+                Object.keys(allGroups).forEach(groupId => {
+                    const group = allGroups[groupId];
+                    
+                    // Проверяем, добавлен ли пользователь в группу и не знает ли он об этом
+                    if (group.participants && group.participants.includes(currentUser) && 
+                        !groups.some(g => g.id === groupId) && document.hidden) {
+                        
+                        // Показываем уведомление
+                        showNotification(`Вас добавили в группу "${group.name}"`);
+                        playNotificationSound();
+                        
+                        // Обновляем список групп
+                        loadGroups();
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке приглашений в группы:', error);
+            }
+        }
+        
+        async function checkForChannelUpdates() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                // Получаем все каналы
+                const response = await fetch(`${firebaseURL}channels.json`);
+                if (!response.ok) throw new Error('Ошибка при проверке обновлений каналов');
+                
+                const allChannels = await response.json();
+                if (!allChannels) return;
+                
+                // Проверяем каждый канал
+                Object.keys(allChannels).forEach(channelId => {
+                    const channel = allChannels[channelId];
+                    
+                    // Проверяем, есть ли новые сообщения в канале, на который подписан пользователь
+                    if (subscribedChannels.includes(channelId) && channel.messages) {
+                        const messages = Object.keys(channel.messages).map(key => ({
+                            id: key,
+                            ...channel.messages[key]
+                        }));
+                        
+                        const latestMessage = messages
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
+                            latestMessage.sender !== currentUser && document.hidden) {
+                            
+                            // Показываем уведомление
+                            showNotification(`Новое сообщение в канале "${channel.name}": ${truncate(latestMessage.text, 30)}`);
+                            playNotificationSound();
+                            
+                            // Обновляем время последнего сообщения
+                            lastMessageTimestamp = latestMessage.timestamp;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при проверке обновлений каналов:', error);
+            }
+        }
+        
+        function playNotificationSound() {
+            try {
+                notificationSound.currentTime = 0;
+                notificationSound.play();
+            } catch (error) {
+                console.error('Ошибка воспроизведения звука уведомления:', error);
+            }
+        }
+        
+        function truncate(text, length) {
+            return text.length > length ? text.substring(0, length) + '...' : text;
+        }
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+        }
+        
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+            
+            if (window.innerWidth <= 768 && currentChat) {
+                adjustMessageInput();
+                scrollToBottom();
+            }
+        }
+        
+        function adjustMessageInput() {
+            if (window.innerWidth <= 768 && currentChat) {
+                const headerHeight = document.querySelector('.chat-header').offsetHeight;
+                const inputHeight = document.querySelector('.message-input').offsetHeight;
+                const windowHeight = window.innerHeight;
+                
+                chatMessages.style.height = `${windowHeight - headerHeight - inputHeight}px`;
+                chatMessages.style.overflowY = 'auto';
+            }
+        }
+        
+        function switchTab(tab) {
+            activeTab = tab;
+            
+            // Сброс активных вкладок
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'chats') {
+                chatsTab.classList.add('active');
+                loadRecentChats();
+            } else if (tab === 'users') {
+                usersTab.classList.add('active');
+                loadUsers();
+            } else if (tab === 'channels') {
+                channelsTab.classList.add('active');
+                loadChannels();
+            }
+        }
+        
+        function toggleTheme() {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('dark_theme', 'true');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('dark_theme', 'false');
+            }
+        }
+        
+        async function openSettings() {
+            newUsernameInput.value = currentUser || '';
+            
+            // Устанавливаем текущий эмодзи
+            document.querySelectorAll('.emoji-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.emoji === userEmoji) {
+                    opt.classList.add('selected');
+                }
+            });
+            
+            // Загружаем заблокированных пользователей
+            await loadBlockedUsers();
+            displayBlockedUsers();
+            
+            settingsModal.classList.add('active');
+            settingsMenu.classList.remove('active');
+        }
+        
+        function closeSettings() {
+            settingsModal.classList.remove('active');
+        }
+        
+        async function saveSettings() {
+            const newUsername = newUsernameInput.value.trim();
+            
+            if (!newUsername) {
+                showNotification('Пожалуйста, введите новый никнейм');
+                return;
+            }
+            
+            if (newUsername === currentUser && userEmoji === userEmojiEl.textContent) {
+                showNotification('Изменений нет');
+                closeSettings();
+                return;
+            }
+            
+            try {
+                // Если никнейм изменился
+                if (newUsername !== currentUser) {
+                    // Проверяем, существует ли уже пользователь с таким именем
+                    const response = await fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`);
+                    if (!response.ok) throw new Error('Ошибка проверки имени');
+                    
+                    const userExists = await response.json();
+                    if (userExists) {
+                        showNotification('Этот никнейм уже занят');
+                        return;
+                    }
+                    
+                    // Обновляем данные пользователя в Firebase
+                    await Promise.all([
+                        // Удаляем старые данные пользователя
+                        fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                            method: 'DELETE'
+                        }),
+                        
+                        // Создаем новые данные пользователя
+                        fetch(`${firebaseURL}users/${encodeURIComponent(newUsername)}.json`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                nickname: newUsername,
+                                emoji: userEmoji,
+                                online: true,
+                                lastSeen: Date.now(),
+                                blockedUsers: blockedUsers,
+                                subscribedChannels: subscribedChannels
+                            })
+                        })
+                    ]);
+                    
+                    // Обновляем текущего пользователя
+                    localStorage.setItem('messenger_user', newUsername);
+                    currentUser = newUsername;
+                    currentUserEl.querySelector('span:last-child').textContent = newUsername;
+                } else {
+                    // Если изменился только эмодзи или список заблокированных/подписанных каналов
+                    await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            emoji: userEmoji,
+                            blockedUsers: blockedUsers,
+                            subscribedChannels: subscribedChannels
+                        })
+                    });
+                }
+                
+                // Обновляем эмодзи в интерфейсе
+                userEmojiEl.textContent = userEmoji;
+                
+                showNotification('Настройки сохранены');
+                closeSettings();
+                
+                // Обновляем список чатов или пользователей в зависимости от активной вкладки
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                } else if (activeTab === 'users') {
+                    loadUsers();
+                } else if (activeTab === 'channels') {
+                    loadChannels();
+                }
+                
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function loadBlockedUsers() {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных пользователя');
+                
+                const userData = await response.json();
+                if (userData && userData.blockedUsers) {
+                    blockedUsers = userData.blockedUsers;
+                } else {
+                    blockedUsers = [];
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки заблокированных пользователей:', error);
+                blockedUsers = [];
+            }
+        }
+        
+        function displayBlockedUsers() {
+            blockedList.innerHTML = '';
+            
+            if (blockedUsers.length === 0) {
+                blockedList.innerHTML = '<div>Нет заблокированных пользователей</div>';
+                return;
+            }
+            
+            blockedUsers.forEach(username => {
+                const blockedItem = document.createElement('div');
+                blockedItem.className = 'blocked-item';
+                blockedItem.innerHTML = `
+                    <span>${username}</span>
+                    <button class="unblock-btn" data-username="${username}">Разблокировать</button>
+                `;
+                
+                blockedList.appendChild(blockedItem);
+            });
+            
+            // Добавляем обработчики для кнопок разблокировки
+            document.querySelectorAll('.unblock-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const username = btn.dataset.username;
+                    unblockUser(username);
+                });
+            });
+        }
+        
+        async function unblockUser(username) {
+            try {
+                blockedUsers = blockedUsers.filter(u => u !== username);
+                
+                // Обновляем данные пользователя в Firebase
+                await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        blockedUsers: blockedUsers
+                    })
+                });
+                
+                displayBlockedUsers();
+                showNotification(`Пользователь ${username} разблокирован`);
+                
+                // Обновляем список пользователей, если активна вкладка "Пользователи"
+                if (activeTab === 'users') {
+                    loadUsers();
+                }
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function toggleBlockUser() {
+            if (!currentChat || currentChatType !== 'user') {
+                showNotification('Нельзя заблокировать группу или канал');
+                return;
+            }
+            
+            const isBlocked = blockedUsers.includes(currentChat);
+            
+            if (isBlocked) {
+                // Разблокировка
+                await unblockUser(currentChat);
+                blockUserBtn.innerHTML = '🚫';
+                blockUserBtn.title = 'Заблокировать пользователя';
+            } else {
+                // Блокировка
+                if (confirm(`Вы уверены, что хотите заблокировать пользователя ${currentChat}?`)) {
+                    try {
+                        blockedUsers.push(currentChat);
+                        
+                        // Обновляем данные пользователя в Firebase
+                        await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                blockedUsers: blockedUsers
+                            })
+                        });
+                        
+                        showNotification(`Пользователь ${currentChat} заблокирован`);
+                        blockUserBtn.innerHTML = '🔓';
+                        blockUserBtn.title = 'Разблокировать пользователя';
+                        
+                        // Обновляем список пользователей, если активна вкладка "Пользователи"
+                        if (activeTab === 'users') {
+                            loadUsers();
+                        }
+                    } catch (error) {
+                        showNotification('Ошибка: ' + error.message);
+                    }
+                }
+            }
+        }
+        
+        async function openCreateGroup() {
+            groupNameInput.value = '';
+            participantsList.innerHTML = '';
+            
+            try {
+                // Загружаем список пользователей
+                const response = await fetch(`${firebaseURL}users.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
+                
+                const users = await response.json();
+                
+                if (!users) {
+                    participantsList.innerHTML = '<div>Пользователи не найдены</div>';
+                    return;
+                }
+                
+                Object.keys(users).forEach(key => {
+                    const user = users[key];
+                    if (key !== currentUser && user && user.nickname) {
+                        const participantItem = document.createElement('div');
+                        participantItem.className = 'participant-item';
+                        participantItem.innerHTML = `
+                            <input type="checkbox" class="participant-checkbox" id="user-${key}" value="${key}">
+                            <label for="user-${key}">${user.nickname} ${user.emoji || '😊'}</label>
+                        `;
+                        
+                        participantsList.appendChild(participantItem);
+                    }
+                });
+                
+                createGroupModal.classList.add('active');
+                settingsMenu.classList.remove('active');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        function closeCreateGroup() {
+            createGroupModal.classList.remove('active');
+        }
+        
+        async function createGroup() {
+            const groupName = groupNameInput.value.trim();
+            if (!groupName) {
+                showNotification('Пожалуйста, введите название группы');
+                return;
+            }
+            
+            const checkboxes = document.querySelectorAll('.participant-checkbox:checked');
+            const participants = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (participants.length < 1) {
+                showNotification('Выберите хотя бы одного участника');
+                return;
+            }
+            
+            // Добавляем текущего пользователя как администратора
+            participants.push(currentUser);
+            
+            try {
+                // Генерируем уникальный ID группы
+                const groupId = 'group_' + Date.now();
+                
+                // Создаем группу в Firebase
+                await fetch(`${firebaseURL}groups/${groupId}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: groupName,
+                        admin: currentUser,
+                        participants: participants,
+                        createdAt: Date.now()
+                    })
+                });
+                
+                showNotification('Группа создана успешно');
+                closeCreateGroup();
+                
+                // Обновляем список групп
+                loadGroups();
+                
+                // Открываем чат группы
+                openGroupChat(groupId, groupName);
+                
+                // Отправляем уведомления участникам
+                participants.forEach(async participant => {
+                    if (participant !== currentUser) {
+                        try {
+                            await fetch(`${firebaseURL}users/${encodeURIComponent(participant)}/notifications.json`, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    type: 'group_invite',
+                                    groupId: groupId,
+                                    groupName: groupName,
+                                    from: currentUser,
+                                    timestamp: Date.now(),
+                                    read: false
+                                })
+                            });
+                        } catch (error) {
+                            console.error(`Ошибка отправки уведомления пользователю ${participant}:`, error);
+                        }
+                    }
+                });
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function loadGroups() {
+            try {
+                const response = await fetch(`${firebaseURL}groups.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке групп');
+                
+                const groupsData = await response.json();
+                groups = [];
+                
+                if (groupsData) {
+                    Object.keys(groupsData).forEach(groupId => {
+                        const group = groupsData[groupId];
+                        if (group.participants && group.participants.includes(currentUser)) {
+                            groups.push({
+                                id: groupId,
+                                name: group.name,
+                                admin: group.admin,
+                                participants: group.participants,
+                                createdAt: group.createdAt
+                            });
+                        }
+                    });
+                }
+                
+                // Если активна вкладка чатов, обновляем список
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки групп:', error);
+            }
+        }
+        
+        function openGroupChat(groupId, groupName) {
+            // Закрываем сайдбар на мобильных
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                mobileTitle.textContent = groupName;
+            }
+            
+            // Очищаем предыдущие слушатели
+            if (currentChat && messageListeners[currentChat]) {
+                clearInterval(messageListeners[currentChat]);
+            }
+            
+            currentChat = groupId;
+            currentChatType = 'group';
+            currentGroup = groups.find(g => g.id === groupId);
+            emptyState.style.display = 'none';
+            chatHeader.style.display = 'flex';
+            chatMessages.style.display = 'block';
+            messageInputContainer.style.display = 'flex';
+            
+            // Обновляем имя группы
+            chatUserEmoji.textContent = '👥';
+            chatUserName.querySelector('span:last-child').textContent = groupName;
+            chatAvatar.textContent = '👥';
+            
+            // Скрываем кнопку блокировки для групп
+            blockUserBtn.style.display = 'none';
+            
+            // Показываем кнопку настроек группы, если пользователь является администратором
+            if (currentGroup && currentGroup.admin === currentUser) {
+                groupSettingsBtn.style.display = 'block';
+            } else {
+                groupSettingsBtn.style.display = 'none';
+            }
+            
+            // Скрываем кнопку настроек канала
+            channelSettingsBtn.style.display = 'none';
+            
+            // Настройка поля ввода для мобильных
+            adjustMessageInput();
+            
+            loadMessages();
+            
+            // Устанавливаем периодическую проверку новых сообщений
+            messageListeners[groupId] = setInterval(() => {
+                loadMessages();
+            }, 3000);
+        }
+        
+        async function openGroupSettings() {
+            if (!currentGroup) return;
+            
+            editGroupNameInput.value = currentGroup.name;
+            editParticipantsList.innerHTML = '';
+            
+            try {
+                // Загружаем список пользователей
+                const response = await fetch(`${firebaseURL}users.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
+                
+                const users = await response.json();
+                
+                if (!users) {
+                    editParticipantsList.innerHTML = '<div>Пользователи не найдены</div>';
+                    return;
+                }
+                
+                // Добавляем участников группы
+                currentGroup.participants.forEach(participant => {
+                    if (participant !== currentUser) { // Исключаем текущего пользователя (админа)
+                        const user = users[participant];
+                        if (user) {
+                            const participantItem = document.createElement('div');
+                            participantItem.className = 'participant-item';
+                            participantItem.innerHTML = `
+                                <span>${user.nickname} ${user.emoji || '😊'}</span>
+                                <button class="remove-participant-btn" data-username="${participant}">Удалить</button>
+                            `;
+                            
+                            editParticipantsList.appendChild(participantItem);
+                        }
+                    }
+                });
+                
+                // Добавляем обработчики для кнопок удаления участников
+                document.querySelectorAll('.remove-participant-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const username = btn.dataset.username;
+                        removeParticipant(username);
+                    });
+                });
+                
+                groupSettingsModal.classList.add('active');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function removeParticipant(username) {
+            if (!currentGroup || currentGroup.admin !== currentUser) return;
+            
+            if (confirm(`Вы уверены, что хотите удалить ${username} из группы?`)) {
+                try {
+                    const updatedParticipants = currentGroup.participants.filter(p => p !== username);
+                    
+                    await fetch(`${firebaseURL}groups/${currentGroup.id}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            participants: updatedParticipants
+                        })
+                    });
+                    
+                    // Обновляем текущую группу
+                    currentGroup.participants = updatedParticipants;
+                    
+                    // Показываем уведомление
+                    showNotification(`Пользователь ${username} удален из группы`);
+                    
+                    // Обновляем список участников
+                    openGroupSettings();
+                    
+                    // Отправляем уведомление удаленному пользователю
+                    try {
+                        await fetch(`${firebaseURL}users/${encodeURIComponent(username)}/notifications.json`, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                type: 'group_remove',
+                                groupId: currentGroup.id,
+                                groupName: currentGroup.name,
+                                from: currentUser,
+                                timestamp: Date.now(),
+                                read: false
+                            })
+                        });
+                    } catch (error) {
+                        console.error(`Ошибка отправки уведомления пользователю ${username}:`, error);
+                    }
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
+            }
+        }
+        
+        function closeGroupSettings() {
+            groupSettingsModal.classList.remove('active');
+        }
+        
+        async function saveGroupSettings() {
+            if (!currentGroup) return;
+            
+            const newName = editGroupNameInput.value.trim();
+            if (!newName) {
+                showNotification('Пожалуйста, введите название группы');
+                return;
+            }
+            
+            try {
+                // Обновляем название группы
+                await fetch(`${firebaseURL}groups/${currentGroup.id}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        name: newName
+                    })
+                });
+                
+                // Обновляем текущую группу
+                currentGroup.name = newName;
+                
+                // Обновляем заголовок чата
+                chatUserName.querySelector('span:last-child').textContent = newName;
+                
+                showNotification('Настройки группы сохранены');
+                closeGroupSettings();
+                
+                // Обновляем список групп
+                loadGroups();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function leaveGroup() {
+            if (!currentGroup) return;
+            
+            if (confirm('Вы уверены, что хотите покинуть эту группу?')) {
+                try {
+                    // Удаляем текущего пользователя из списка участников
+                    const updatedParticipants = currentGroup.participants.filter(p => p !== currentUser);
+                    
+                    await fetch(`${firebaseURL}groups/${currentGroup.id}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            participants: updatedParticipants
+                        })
+                    });
+                    
+                    showNotification('Вы покинули группу');
+                    closeGroupSettings();
+                    closeChat();
+                    
+                    // Обновляем список групп
+                    loadGroups();
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
+            }
+        }
+        
+        async function deleteChat() {
+            if (!currentChat) return;
+            
+            let confirmMessage = '';
+            if (currentChatType === 'group') {
+                const group = groups.find(g => g.id === currentChat);
+                if (group && group.admin === currentUser) {
+                    confirmMessage = 'Вы уверены, что хотите удалить эту группу? Это действие необратимо.';
+                } else {
+                    confirmMessage = 'Вы уверены, что хотите покинуть эту группу?';
+                }
+            } else if (currentChatType === 'channel') {
+                const channel = channels.find(c => c.id === currentChat);
+                if (channel && channel.creator === currentUser) {
+                    confirmMessage = 'Вы уверены, что хотите удалить этот канал? Это действие необратимо.';
+                } else {
+                    confirmMessage = 'Вы уверены, что хотите отписаться от этого канала?';
+                }
+            } else {
+                confirmMessage = 'Вы уверены, что хотите удалить этот чат? Все сообщения будут удалены.';
+            }
+            
+            if (confirm(confirmMessage)) {
+                try {
+                    if (currentChatType === 'group') {
+                        const group = groups.find(g => g.id === currentChat);
+                        if (group && group.admin === currentUser) {
+                            // Удаление группы (только администратор)
+                            await fetch(`${firebaseURL}groups/${currentChat}.json`, {
+                                method: 'DELETE'
+                            });
+                            
+                            // Удаление сообщений группы
+                            await fetch(`${firebaseURL}messages/${currentChat}.json`, {
+                                method: 'DELETE'
+                            });
+                            
+                            showNotification('Группа удалена');
+                        } else {
+                            // Покидание группы
+                            const updatedParticipants = group.participants.filter(p => p !== currentUser);
+                            
+                            await fetch(`${firebaseURL}groups/${currentChat}.json`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({
+                                    participants: updatedParticipants
+                                })
+                            });
+                            
+                            showNotification('Вы покинули группу');
+                        }
+                        
+                        // Обновляем список групп
+                        loadGroups();
+                    } else if (currentChatType === 'channel') {
+                        const channel = channels.find(c => c.id === currentChat);
+                        if (channel && channel.creator === currentUser) {
+                            // Удаление канала (только создатель)
+                            await fetch(`${firebaseURL}channels/${currentChat}.json`, {
+                                method: 'DELETE'
+                            });
+                            
+                            showNotification('Канал удален');
+                        } else {
+                            // Отписка от канала
+                            await unsubscribeFromChannel(currentChat);
+                            
+                            showNotification('Вы отписались от канала');
+                        }
+                        
+                        // Обновляем список каналов
+                        loadChannels();
+                    } else {
+                        // Удаление личного чата
+                        const chatId = getChatId(currentUser, currentChat);
+                        await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        showNotification('Чат удален');
+                    }
+                    
+                    // Закрываем чат
+                    closeChat();
+                    
+                    // Обновляем список чатов
+                    if (activeTab === 'chats') {
+                        loadRecentChats();
+                    }
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
+            }
+        }
+        
+        async function requestUsername() {
+            let username = '';
+            
+            // Создаем модальное окно для ввода имени
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.right = '0';
+            modal.style.bottom = '0';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.style.zIndex = '1000';
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.padding = '20px';
+            modalContent.style.borderRadius = '10px';
+            modalContent.style.width = '90%';
+            modalContent.style.maxWidth = '400px';
+            
+            modalContent.innerHTML = `
+                <h2 style="margin-bottom: 15px; text-align: center;">Введите ваш никнейм</h2>
+                <input type="text" id="username-input" 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px; font-size: 16px;"
+                       placeholder="Ваш никнейм" autocomplete="off">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">Выберите статус:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <span class="emoji-option" data-emoji="😊" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😊</span>
+                        <span class="emoji-option" data-emoji="😎" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😎</span>
+                        <span class="emoji-option" data-emoji="🤔" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">🤔</span>
+                        <span class="emoji-option" data-emoji="😴" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😴</span>
+                        <span class="emoji-option" data-emoji="😢" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😢</span>
+                        <span class="emoji-option" data-emoji="😡" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😡</span>
+                        <span class="emoji-option" data-emoji="🥳" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">🥳</span>
+                        <span class="emoji-option" data-emoji="😍" style="font-size: 1.5rem; cursor: pointer; padding: 5px; border-radius: 5px;">😍</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>
+                        <input type="checkbox" id="remember-me" checked>
+                        <span>Запомнить меня</span>
+                    </label>
+                </div>
+                <button id="submit-username" 
+                        style="width: 100%; padding: 12px; background: #6c5ce7; color: white; border: none; border-radius: 5px;">
+                    Продолжить
+                </button>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            const usernameInput = document.getElementById('username-input');
+            const submitBtn = document.getElementById('submit-username');
+            const emojiOptions = modalContent.querySelectorAll('.emoji-option');
+            const rememberMe = document.getElementById('remember-me');
+            
+            // Устанавливаем эмодзи по умолчанию
+            emojiOptions[0].classList.add('selected');
+            userEmoji = emojiOptions[0].dataset.emoji;
+            
+            // Обработка выбора эмодзи
+            emojiOptions.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    emojiOptions.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    userEmoji = opt.dataset.emoji;
+                });
+            });
+            
+            // Фокус на поле ввода
+            usernameInput.focus();
+            
+            // Обработка отправки
+            submitBtn.addEventListener('click', async () => {
+                username = usernameInput.value.trim();
+                if (username) {
+                    // Проверяем, существует ли пользователь
+                    const response = await fetch(`${firebaseURL}users/${encodeURIComponent(username)}.json`);
+                    if (!response.ok) throw new Error('Ошибка проверки имени');
+                    
+                    const userExists = await response.json();
+                    if (userExists) {
+                        showNotification('Этот никнейм уже занят');
+                        return;
+                    }
+                    
+                    currentUser = username;
+                    if (rememberMe.checked) {
+                        localStorage.setItem('messenger_user', username);
+                    }
+                    currentUserEl.querySelector('span:last-child').textContent = username;
+                    userEmojiEl.textContent = userEmoji;
+                    
+                    // Добавляем пользователя в Firebase
+                    await addUserToFirebase(username, userEmoji);
+                    await updateUserStatus(true);
+                    
+                    // Загружаем последние чаты
+                    loadRecentChats();
+                    loadGroups();
+                    loadChannels();
+                    
+                    document.body.removeChild(modal);
+                    
+                    // Запускаем проверку новых сообщений и уведомлений
+                    startBackgroundChecks();
+                } else {
+                    showNotification('Пожалуйста, введите никнейм');
+                }
+            });
+            
+            // Закрытие при нажатии на Esc
+            document.addEventListener('keydown', function handler(e) {
+                if (e.key === 'Escape') {
+                    document.body.removeChild(modal);
+                    document.removeEventListener('keydown', handler);
+                    showNotification('Для использования мессенджера нужен никнейм');
+                }
+            });
+        }
+        
+        async function loadUserData() {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных пользователя');
+                
+                const userData = await response.json();
+                if (userData) {
+                    if (userData.emoji) {
+                        userEmoji = userData.emoji;
+                        userEmojiEl.textContent = userEmoji;
+                    }
+                    if (userData.blockedUsers) {
+                        blockedUsers = userData.blockedUsers;
+                    }
+                    if (userData.subscribedChannels) {
+                        subscribedChannels = userData.subscribedChannels;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки данных пользователя:', error);
+            }
+        }
+        
+        async function addUserToFirebase(username, emoji) {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(username)}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        nickname: username,
+                        emoji: emoji,
+                        online: true,
+                        lastSeen: Date.now(),
+                        blockedUsers: [],
+                        subscribedChannels: []
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при добавлении пользователя');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function updateUserStatus(online) {
+            if (!currentUser) return;
+            
+            try {
+                await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        online: online,
+                        lastSeen: Date.now()
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка обновления статуса:', error);
+            }
+        }
+        
+        async function loadRecentChats() {
+            try {
+                searchResults.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-light);">Загрузка чатов...</div>';
+                
+                // Получаем все чаты, в которых участвует текущий пользователь
+                const response = await fetch(`${firebaseURL}messages.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке чатов');
+                
+                const allChats = await response.json();
+                const recentChats = [];
+                
+                // Обрабатываем личные чаты
+                if (allChats) {
+                    Object.keys(allChats).forEach(chatId => {
+                        // Проверяем, что текущий пользователь участвует в чате и это не группа и не канал
+                        if (chatId.includes(currentUser) && !chatId.startsWith('group_') && !chatId.startsWith('channel_')) {
+                            const messages = allChats[chatId];
+                            
+                            // Преобразуем сообщения в массив
+                            const messagesArray = Object.keys(messages).map(key => ({
+                                id: key,
+                                ...messages[key]
+                            }));
+                            
+                            // Находим последнее сообщение
+                            const lastMessage = messagesArray
+                                .filter(msg => msg.text && msg.sender && msg.timestamp)
+                                .sort((a, b) => b.timestamp - a.timestamp)[0];
+                            
+                            if (lastMessage) {
+                                // Определяем собеседника
+                                const otherUser = chatId.replace(currentUser, '').replace('_', '');
+                                
+                                recentChats.push({
+                                    id: chatId,
+                                    user: otherUser,
+                                    lastMessage: lastMessage.text,
+                                    timestamp: lastMessage.timestamp,
+                                    sender: lastMessage.sender,
+                                    type: 'user'
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                // Обрабатываем групповые чаты
+                for (const group of groups) {
+                    const groupId = group.id;
+                    const groupMessages = allChats && allChats[groupId];
+                    
+                    if (groupMessages) {
+                        // Преобразуем сообщения в массив
+                        const messagesArray = Object.keys(groupMessages).map(key => ({
+                            id: key,
+                            ...groupMessages[key]
+                        }));
+                        
+                        // Находим последнее сообщение
+                        const lastMessage = messagesArray
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (lastMessage) {
+                            recentChats.push({
+                                id: groupId,
+                                name: group.name,
+                                lastMessage: lastMessage.text,
+                                timestamp: lastMessage.timestamp,
+                                sender: lastMessage.sender,
+                                type: 'group'
+                            });
+                        }
+                    } else {
+                        // Если сообщений нет, все равно добавляем группу
+                        recentChats.push({
+                            id: groupId,
+                            name: group.name,
+                            lastMessage: 'Нет сообщений',
+                            timestamp: group.createdAt,
+                            sender: null,
+                            type: 'group'
+                        });
+                    }
+                }
+                
+                // Обрабатываем каналы
+                for (const channel of channels) {
+                    const channelId = channel.id;
+                    const channelMessages = allChats && allChats[channelId];
+                    
+                    if (channelMessages) {
+                        // Преобразуем сообщения в массив
+                        const messagesArray = Object.keys(channelMessages).map(key => ({
+                            id: key,
+                            ...channelMessages[key]
+                        }));
+                        
+                        // Находим последнее сообщение
+                        const lastMessage = messagesArray
+                            .filter(msg => msg.text && msg.sender && msg.timestamp)
+                            .sort((a, b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (lastMessage) {
+                            recentChats.push({
+                                id: channelId,
+                                name: channel.name,
+                                lastMessage: lastMessage.text,
+                                timestamp: lastMessage.timestamp,
+                                sender: lastMessage.sender,
+                                type: 'channel'
+                            });
+                        }
+                    } else {
+                        // Если сообщений нет, все равно добавляем канал
+                        recentChats.push({
+                            id: channelId,
+                            name: channel.name,
+                            lastMessage: 'Нет сообщений',
+                            timestamp: channel.createdAt,
+                            sender: null,
+                            type: 'channel'
+                        });
+                    }
+                }
+                
+                // Сортируем чаты по времени последнего сообщения
+                recentChats.sort((a, b) => b.timestamp - a.timestamp);
+                
+                displayRecentChats(recentChats);
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+                searchResults.innerHTML = '<div class="user-item">Ошибка загрузки чатов</div>';
+            }
+        }
+        
+        async function displayRecentChats(chats) {
+            searchResults.innerHTML = '';
+            
+            if (chats.length === 0) {
+                searchResults.innerHTML = '<div class="user-item">У вас пока нет чатов</div>';
+                return;
+            }
+            
+            // Получаем информацию о пользователях для личных чатов
+            const usersPromises = chats
+                .filter(chat => chat.type === 'user')
+                .map(chat => 
+                    fetch(`${firebaseURL}users/${encodeURIComponent(chat.user)}.json`)
+                        .then(response => response.json())
+                        .then(userData => ({
+                            ...chat,
+                            userData: userData || { nickname: chat.user, online: false, emoji: '😊' }
+                        }))
+                );
+            
+            const chatsWithUserData = await Promise.all(usersPromises);
+            
+            // Добавляем групповые чаты и каналы
+            const allChats = [
+                ...chatsWithUserData,
+                ...chats.filter(chat => chat.type === 'group' || chat.type === 'channel')
+            ];
+            
+            allChats.forEach(chat => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const messageDate = new Date(chat.timestamp);
+                const timeString = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Определяем текст последнего сообщения
+                let lastMessageText = chat.lastMessage;
+                if (chat.type === 'user') {
+                    if (chat.sender === currentUser) {
+                        lastMessageText = `Вы: ${lastMessageText}`;
+                    }
+                } else {
+                    if (chat.sender) {
+                        lastMessageText = `${chat.sender}: ${lastMessageText}`;
+                    }
+                }
+                
+                // Определяем аватар и имя
+                let avatar, name, emoji;
+                if (chat.type === 'user') {
+                    avatar = chat.userData.nickname.charAt(0).toUpperCase();
+                    name = chat.userData.nickname;
+                    emoji = chat.userData.emoji || '😊';
+                } else if (chat.type === 'group') {
+                    avatar = '👥';
+                    name = chat.name;
+                    emoji = '👥';
+                } else { // channel
+                    avatar = '📢';
+                    name = chat.name;
+                    emoji = '📢';
+                }
+                
+                userItem.innerHTML = `
+                    <div class="user-avatar">${avatar}</div>
+                    <div class="user-info">
+                        <h3>
+                            <span class="user-emoji-small">${emoji}</span>
+                            <span>${name}</span>
+                        </h3>
+                        <div class="chat-preview">
+                            <div class="last-message">${escapeHtml(lastMessageText)}</div>
+                            <div class="last-time">${formatLastSeen(chat.timestamp)}</div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}" data-chat-type="${chat.type}" title="Удалить чат">🗑️</button>
+                    </div>
+                `;
+                
+                // Обработчик открытия чата
+                userItem.addEventListener('click', (e) => {
+                    // Если нажали на кнопку удаления, не открываем чат
+                    if (e.target.classList.contains('delete-chat-btn')) {
+                        return;
+                    }
+                    
+                    if (chat.type === 'user') {
+                        openChat(chat.userData.nickname, chat.userData.emoji || '😊');
+                    } else if (chat.type === 'group') {
+                        openGroupChat(chat.id, chat.name);
+                    } else if (chat.type === 'channel') {
+                        openChannelChat(chat.id, chat.name);
+                    }
+                });
+                
+                // Обработчик удаления чата
+                const deleteBtn = userItem.querySelector('.delete-chat-btn');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    let confirmMessage = '';
+                    if (chat.type === 'group') {
+                        const group = groups.find(g => g.id === chat.id);
+                        if (group && group.admin === currentUser) {
+                            confirmMessage = 'Вы уверены, что хотите удалить эту группу? Это действие необратимо.';
+                        } else {
+                            confirmMessage = 'Вы уверены, что хотите покинуть эту группу?';
+                        }
+                    } else if (chat.type === 'channel') {
+                        const channel = channels.find(c => c.id === chat.id);
+                        if (channel && channel.creator === currentUser) {
+                            confirmMessage = 'Вы уверены, что хотите удалить этот канал? Это действие необратимо.';
+                        } else {
+                            confirmMessage = 'Вы уверены, что хотите отписаться от этого канала?';
+                        }
+                    } else {
+                        confirmMessage = 'Вы уверены, что хотите удалить этот чат? Все сообщения будут удалены.';
+                    }
+                    
+                    if (confirm(confirmMessage)) {
+                        deleteChatById(chat.id, chat.type);
+                    }
+                });
+                
+                searchResults.appendChild(userItem);
+            });
+        }
+        
+        async function deleteChatById(chatId, type) {
+            try {
+                if (type === 'group') {
+                    const group = groups.find(g => g.id === chatId);
+                    if (group && group.admin === currentUser) {
+                        // Удаление группы (только администратор)
+                        await fetch(`${firebaseURL}groups/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        // Удаление сообщений группы
+                        await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        showNotification('Группа удалена');
+                    } else {
+                        // Покидание группы
+                        const updatedParticipants = group.participants.filter(p => p !== currentUser);
+                        
+                        await fetch(`${firebaseURL}groups/${chatId}.json`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                participants: updatedParticipants
+                            })
+                        });
+                        
+                        showNotification('Вы покинули группу');
+                    }
+                    
+                    // Обновляем список групп
+                    loadGroups();
+                } else if (type === 'channel') {
+                    const channel = channels.find(c => c.id === chatId);
+                    if (channel && channel.creator === currentUser) {
+                        // Удаление канала (только создатель)
+                        await fetch(`${firebaseURL}channels/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        // Удаление сообщений канала
+                        await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                            method: 'DELETE'
+                        });
+                        
+                        showNotification('Канал удален');
+                    } else {
+                        // Отписка от канала
+                        await unsubscribeFromChannel(chatId);
+                        
+                        showNotification('Вы отписались от канала');
+                    }
+                    
+                    // Обновляем список каналов
+                    loadChannels();
+                } else {
+                    // Удаление личного чата
+                    await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                        method: 'DELETE'
+                    });
+                    
+                    showNotification('Чат удален');
+                }
+                
+                // Обновляем список чатов
+                loadRecentChats();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${firebaseURL}users.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
+                
+                const users = await response.json();
+                displayUsers(users);
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        function displayUsers(users) {
+            searchResults.innerHTML = '';
+            
+            if (!users) {
+                searchResults.innerHTML = '<div class="user-item">Пользователи не найдены</div>';
+                return;
+            }
+            
+            Object.keys(users).forEach(key => {
+                const user = users[key];
+                // Проверяем, что user существует и имеет nickname
+                if (key !== currentUser && user && user.nickname) {
+                    // Проверяем, не заблокирован ли пользователь
+                    const isBlocked = blockedUsers.includes(key);
+                    
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.innerHTML = `
+                        <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
+                        <div class="user-info">
+                            <h3>
+                                <span class="user-emoji-small">${user.emoji || '😊'}</span>
+                                <span>${user.nickname}</span>
+                                ${isBlocked ? '<span style="color: var(--danger-color); margin-left: 5px;">(Заблокирован)</span>' : ''}
+                            </h3>
+                            <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
+                        </div>
+                    `;
+                    
+                    if (!isBlocked) {
+                        userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
+                    }
+                    
+                    searchResults.appendChild(userItem);
+                }
+            });
+        }
+        
+        function formatLastSeen(timestamp) {
+            if (!timestamp) return 'Был(а) давно';
+            
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / (1000 * 60));
+            
+            if (minutes < 1) return 'Только что';
+            if (minutes < 60) return `Был(а) ${minutes} мин назад`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `Был(а) ${hours} ч назад`;
+            
+            const days = Math.floor(hours / 24);
+            return `Был(а) ${days} д назад`;
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.toLowerCase().trim();
+            
+            if (query === '') {
+                // Если поиск пустой, загружаем контент в зависимости от активной вкладки
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                } else if (activeTab === 'users') {
+                    loadUsers();
+                } else if (activeTab === 'channels') {
+                    loadChannels();
+                }
+                return;
+            }
+            
+            try {
+                if (activeTab === 'users') {
+                    const response = await fetch(`${firebaseURL}users.json`);
+                    if (!response.ok) throw new Error('Ошибка при поиске пользователей');
+                    
+                    const users = await response.json();
+                    searchResults.innerHTML = '';
+                    
+                    if (!users) {
+                        searchResults.innerHTML = '<div class="user-item">Пользователи не найдены</div>';
+                        return;
+                    }
+                    
+                    Object.keys(users).forEach(key => {
+                        const user = users[key];
+                        if (key !== currentUser && user && user.nickname && 
+                            user.nickname.toLowerCase().includes(query)) {
+                            // Проверяем, не заблокирован ли пользователь
+                            const isBlocked = blockedUsers.includes(key);
+                            
+                            const userItem = document.createElement('div');
+                            userItem.className = 'user-item';
+                            userItem.innerHTML = `
+                                <div class="user-avatar">${user.nickname.charAt(0).toUpperCase()}</div>
+                                <div class="user-info">
+                                    <h3>
+                                        <span class="user-emoji-small">${user.emoji || '😊'}</span>
+                                        <span>${user.nickname}</span>
+                                        ${isBlocked ? '<span style="color: var(--danger-color); margin-left: 5px;">(Заблокирован)</span>' : ''}
+                                    </h3>
+                                    <p>${user.online ? 'Онлайн' : formatLastSeen(user.lastSeen)}</p>
+                                </div>
+                            `;
+                            
+                            if (!isBlocked) {
+                                userItem.addEventListener('click', () => openChat(user.nickname, user.emoji || '😊'));
+                            }
+                            
+                            searchResults.appendChild(userItem);
+                        }
+                    });
+                } else if (activeTab === 'channels') {
+                    const response = await fetch(`${firebaseURL}channels.json`);
+                    if (!response.ok) throw new Error('Ошибка при поиске каналов');
+                    
+                    const allChannels = await response.json();
+                    searchResults.innerHTML = '';
+                    
+                    if (!allChannels) {
+                        searchResults.innerHTML = '<div class="user-item">Каналы не найдены</div>';
+                        return;
+                    }
+                    
+                    Object.keys(allChannels).forEach(channelId => {
+                        const channel = allChannels[channelId];
+                        if (channel && channel.name && 
+                            channel.name.toLowerCase().includes(query)) {
+                            
+                            const channelItem = document.createElement('div');
+                            channelItem.className = 'channel-item';
+                            
+                            const isSubscribed = subscribedChannels.includes(channelId);
+                            
+                            channelItem.innerHTML = `
+                                <div class="channel-icon">📢</div>
+                                <div class="channel-info">
+                                    <h3>${channel.name}</h3>
+                                    <p>${channel.description || 'Нет описания'}</p>
+                                    <div class="channel-subscribers">
+                                        <span>👤 ${channel.subscribers ? channel.subscribers.length : 0}</span>
+                                    </div>
+                                </div>
+                                <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" data-channel-id="${channelId}">
+                                    ${isSubscribed ? 'Отписаться' : 'Подписаться'}
+                                </button>
+                            `;
+                            
+                            // Обработчик подписки/отписки
+                            const subscribeBtn = channelItem.querySelector('.subscribe-btn');
+                            subscribeBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                toggleSubscribe(channelId);
+                            });
+                            
+                            // Обработчик открытия канала
+                            channelItem.addEventListener('click', () => {
+                                if (isSubscribed) {
+                                    openChannelChat(channelId, channel.name);
+                                } else {
+                                    showNotification('Подпишитесь на канал, чтобы просматривать сообщения');
+                                }
+                            });
+                            
+                            searchResults.appendChild(channelItem);
+                        }
+                    });
+                }
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        function openChat(username, emoji = '😊') {
+            // Закрываем сайдбар на мобильных
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                mobileTitle.textContent = username;
+            }
+            
+            // Очищаем предыдущие слушатели
+            if (currentChat && messageListeners[currentChat]) {
+                clearInterval(messageListeners[currentChat]);
+            }
+            
+            currentChat = username;
+            currentChatType = 'user';
+            currentGroup = null;
+            currentChannel = null;
+            emptyState.style.display = 'none';
+            chatHeader.style.display = 'flex';
+            chatMessages.style.display = 'block';
+            messageInputContainer.style.display = 'flex';
+            
+            // Обновляем эмодзи и имя собеседника
+            chatUserEmoji.textContent = emoji;
+            chatUserName.querySelector('span:last-child').textContent = username;
+            chatAvatar.textContent = username.charAt(0).toUpperCase();
+            
+            // Показываем кнопку блокировки для личных чатов
+            blockUserBtn.style.display = 'block';
+            groupSettingsBtn.style.display = 'none';
+            channelSettingsBtn.style.display = 'none';
+            
+            // Обновляем состояние кнопки блокировки
+            if (blockedUsers.includes(username)) {
+                blockUserBtn.innerHTML = '🔓';
+                blockUserBtn.title = 'Разблокировать пользователя';
+            } else {
+                blockUserBtn.innerHTML = '🚫';
+                blockUserBtn.title = 'Заблокировать пользователя';
+            }
+            
+            // Настройка поля ввода для мобильных
+            adjustMessageInput();
+            
+            loadMessages();
+            
+            // Устанавливаем периодическую проверку новых сообщений
+            messageListeners[username] = setInterval(() => {
+                loadMessages();
+            }, 3000);
+        }
+        
+        function closeChat() {
+            if (window.innerWidth <= 768) {
+                emptyState.style.display = 'flex';
+                chatHeader.style.display = 'none';
+                chatMessages.style.display = 'none';
+                messageInputContainer.style.display = 'none';
+                mobileTitle.textContent = 'Twin';
+                sidebar.classList.add('active');
+            } else {
+                emptyState.style.display = 'flex';
+                chatHeader.style.display = 'none';
+                chatMessages.style.display = 'none';
+                messageInputContainer.style.display = 'none';
+            }
+            
+            // Очищаем слушатель для этого чата
+            if (currentChat && messageListeners[currentChat]) {
+                clearInterval(messageListeners[currentChat]);
+                delete messageListeners[currentChat];
+            }
+            
+            currentChat = null;
+            currentChatType = null;
+            currentGroup = null;
+            currentChannel = null;
+        }
+        
+        async function loadMessages() {
+            if (!currentChat) return;
+            
+            try {
+                let chatId;
+                if (currentChatType === 'group' || currentChatType === 'channel') {
+                    chatId = currentChat;
+                } else {
+                    chatId = getChatId(currentUser, currentChat);
+                }
+                
+                const response = await fetch(`${firebaseURL}messages/${chatId}.json`);
+                
+                if (!response.ok) throw new Error('Ошибка при загрузке сообщений');
+                
+                const messages = await response.json();
+                displayMessages(messages);
+            } catch (error) {
+                console.error('Ошибка загрузки сообщений:', error);
+                showNotification('Ошибка загрузки сообщений: ' + error.message);
+            }
+        }
+        
+        function displayMessages(messages, autoScroll = true) {
+    chatMessages.innerHTML = '';
+    
+    if (!messages) {
+        chatMessages.innerHTML = '<div class="message"><div class="message-content">Нет сообщений</div></div>';
+                return;
+            }
+            
+            // Преобразуем объект сообщений в массив
+            const messagesArray = Object.keys(messages).map(key => ({
+                id: key,
+                ...messages[key]
+            }));
+            
+            // Фильтруем сообщения от заблокированных пользователей (только для личных чатов)
+            const filteredMessages = messagesArray.filter(message => {
+                if (currentChatType === 'user') {
+                    return !blockedUsers.includes(message.sender);
+                }
+                return true;
+            });
+            
+            // Сортируем сообщения по времени с учетом ID для сообщений с одинаковым timestamp
+            const sortedMessages = filteredMessages
+                .filter(msg => msg.text && msg.sender && msg.timestamp) // Фильтруем неполные сообщения
+                .sort((a, b) => {
+                    // Сначала сортируем по timestamp
+                    if (a.timestamp !== b.timestamp) {
+                        return a.timestamp - b.timestamp;
+                    }
+                    // Если timestamp одинаковые, сортируем по ID
+                    return a.id.localeCompare(b.id);
+                });
+            
+            // Если сообщений нет, добавляем заглушку
+            if (sortedMessages.length === 0) {
+                chatMessages.innerHTML = '<div class="message"><div class="message-content">Нет сообщений</div></div>';
+                return;
+            }
+            
+            // Создаем HTML для сообщений
+            let messagesHTML = '';
+            let lastDate = null;
+            
+            sortedMessages.forEach(message => {
+                const messageDate = new Date(message.timestamp);
+                const dateString = messageDate.toLocaleDateString();
+                
+                // Добавляем дату, если она изменилась
+                if (dateString !== lastDate) {
+                    messagesHTML += `
+                        <div style="text-align: center; margin: 15px 0;">
+                            <span style="background: var(--message-hover); padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
+                                ${dateString}
+                            </span>
+                        </div>
+                    `;
+                    lastDate = dateString;
+                }
+                
+                const timeString = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Определяем, является ли сообщение отправленным или полученным
+                const isSent = message.sender === currentUser;
+                
+                // Добавляем кнопки действий для сообщений текущего пользователя
+                const actionsHTML = isSent ? `
+                    <div class="message-actions">
+                        <button class="message-action-btn" onclick="editMessage('${message.id}', '${escapeHtml(message.text).replace(/'/g, "\\'")}')">✏️</button>
+                        <button class="message-action-btn" onclick="deleteMessage('${message.id}')">🗑️</button>
+                    </div>
+                ` : '';
+                
+                // Для групповых чатов и каналов добавляем имя отправителя
+                let senderName = '';
+                if ((currentChatType === 'group' || currentChatType === 'channel') && !isSent) {
+                    senderName = `<div style="font-size: 0.8rem; margin-bottom: 3px; color: var(--text-light);">${message.sender}</div>`;
+                }
+                
+                // Добавляем отметку "изменено" для отредактированных сообщений
+                const editedMark = message.edited ? ' <span style="font-size: 0.7rem; color: var(--text-light);">(изменено)</span>' : '';
+                
+                messagesHTML += `
+                    <div class="message ${isSent ? 'sent' : 'received'}">
+                        ${senderName}
+                        <div class="message-content">${escapeHtml(message.text)}${editedMark}</div>
+                        <div class="message-time">${timeString}</div>
+                        ${actionsHTML}
+                    </div>
+                `;
+            });
+            
+            chatMessages.innerHTML = messagesHTML;
+            
+            // Прокрутка вниз
+            scrollToBottom();
+        }
+        
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        function scrollToBottom() {
+    // Проверяем, находимся ли мы уже внизу или близко к низу
+    const isScrolledToBottom = chatMessages.scrollHeight - chatMessages.clientHeight <= chatMessages.scrollTop + 50;
+    
+    // Прокручиваем вниз только если мы уже были внизу или это новый чат
+    if (isScrolledToBottom || !currentChat) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // На мобильных добавляем небольшую задержку для плавности
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+    }
+}
+async function loadMessages() {
+    if (!currentChat) return;
+    
+    try {
+        let chatId;
+        if (currentChatType === 'group' || currentChatType === 'channel') {
+            chatId = currentChat;
+        } else {
+            chatId = getChatId(currentUser, currentChat);
+        }
+        
+        const response = await fetch(`${firebaseURL}messages/${chatId}.json`);
+        
+        if (!response.ok) throw new Error('Ошибка при загрузке сообщений');
+        
+        const messages = await response.json();
+        
+        // Для каналов не прокручиваем автоматически, если пользователь не внизу
+        if (currentChatType === 'channel') {
+            displayMessages(messages, false); // false = не прокручивать автоматически
+        } else {
+            displayMessages(messages, true); // true = прокручивать автоматически
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки сообщений:', error);
+        showNotification('Ошибка загрузки сообщений: ' + error.message);
+    }
+}
+        
+       
+        
+        async function sendMessage() {
+            const text = messageText.value.trim();
+            if (!text || !currentChat) return;
+            
+            let chatId;
+            if (currentChatType === 'group' || currentChatType === 'channel') {
+                chatId = currentChat;
+            } else {
+                chatId = getChatId(currentUser, currentChat);
+            }
+            
+            // Проверяем, может ли пользователь отправлять сообщения в этот чат
+            if (currentChatType === 'channel') {
+                const channel = channels.find(c => c.id === chatId);
+                if (!channel || channel.creator !== currentUser) {
+                    showNotification('Только создатель канала может отправлять сообщения');
+                    return;
+                }
+            }
+            
+            const message = {
+                sender: currentUser,
+                text: text,
+                timestamp: Date.now()
+            };
+            
+            // Если это личный чат, добавляем получателя
+            if (currentChatType === 'user') {
+                message.receiver = currentChat;
+            }
+            
+            try {
+                const response = await fetch(`${firebaseURL}messages/${chatId}.json`, {
+                    method: 'POST',
+                    body: JSON.stringify(message)
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при отправке сообщения');
+                
+                messageText.value = '';
+                
+                // Обновляем сообщения и прокручиваем вниз
+                loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+                
+                // Фокус на поле ввода
+                messageText.focus();
+                
+                // Обновляем время последнего сообщения
+                lastMessageTimestamp = message.timestamp;
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        function getChatId(user1, user2) {
+            return [user1, user2].sort().join('_');
+        }
+        
+        function editMessage(messageId, text) {
+            editingMessageId = messageId;
+            editMessageText.value = unescapeHtml(text);
+            editMessageModal.classList.add('active');
+        }
+        
+        function closeEditMessage() {
+            editMessageModal.classList.remove('active');
+            editingMessageId = null;
+        }
+        
+        async function saveEditedMessage() {
+            if (!editingMessageId || !currentChat) return;
+            
+            const newText = editMessageText.value.trim();
+            if (!newText) {
+                showNotification('Сообщение не может быть пустым');
+                return;
+            }
+            
+            try {
+                let chatId;
+                if (currentChatType === 'group' || currentChatType === 'channel') {
+                    chatId = currentChat;
+                } else {
+                    chatId = getChatId(currentUser, currentChat);
+                }
+                
+                const response = await fetch(`${firebaseURL}messages/${chatId}/${editingMessageId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        text: newText,
+                        edited: true
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при редактировании сообщения');
+                
+                closeEditMessage();
+                loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+                
+                showNotification('Сообщение отредактировано');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function deleteMessage(messageId) {
+            if (!confirm('Вы уверены, что хотите удалить это сообщение?')) return;
+            
+            try {
+                let chatId;
+                if (currentChatType === 'group' || currentChatType === 'channel') {
+                    chatId = currentChat;
+                } else {
+                    chatId = getChatId(currentUser, currentChat);
+                }
+                
+                const response = await fetch(`${firebaseURL}messages/${chatId}/${messageId}.json`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Ошибка при удалении сообщения');
+                
+                loadMessages();
+                
+                // Если мы на вкладке чатов, обновляем список последних чатов
+                if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+                
+                showNotification('Сообщение удалено');
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        function unescapeHtml(safe) {
+            return safe
+                .replace(/&amp;/g, "&")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&quot;/g, "\"")
+                .replace(/&#039;/g, "'");
+        }
+        
+        function handleLogout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                // Обновляем статус перед выходом
+                updateUserStatus(false)
+                    .finally(() => {
+                        localStorage.removeItem('messenger_user');
+                        location.reload();
+                    });
+            }
+        }
+        
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+        
+        // Функции для работы с каналами
+        async function openCreateChannel() {
+            channelNameInput.value = '';
+            channelDescriptionInput.value = '';
+            
+            createChannelModal.classList.add('active');
+            settingsMenu.classList.remove('active');
+        }
+        
+        function closeCreateChannel() {
+            createChannelModal.classList.remove('active');
+        }
+        
+        async function createChannel() {
+            const channelName = channelNameInput.value.trim();
+            const channelDescription = channelDescriptionInput.value.trim();
+            
+            if (!channelName) {
+                showNotification('Пожалуйста, введите название канала');
+                return;
+            }
+            
+            try {
+                // Генерируем уникальный ID канала
+                const channelId = 'channel_' + Date.now();
+                
+                // Создаем канал в Firebase
+                await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: channelName,
+                        description: channelDescription,
+                        creator: currentUser,
+                        subscribers: [currentUser],
+                        createdAt: Date.now()
+                    })
+                });
+                
+                showNotification('Канал создан успешно');
+                closeCreateChannel();
+                
+                // Обновляем список каналов
+                loadChannels();
+                
+                // Открываем чат канала
+                openChannelChat(channelId, channelName);
+                
+                // Обновляем список подписанных каналов
+                subscribedChannels.push(channelId);
+                await updateSubscribedChannels();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function loadChannels() {
+            try {
+                const response = await fetch(`${firebaseURL}channels.json`);
+                if (!response.ok) throw new Error('Ошибка при загрузке каналов');
+                
+                const channelsData = await response.json();
+                channels = [];
+                
+                if (channelsData) {
+                    Object.keys(channelsData).forEach(channelId => {
+                        const channel = channelsData[channelId];
+                        channels.push({
+                            id: channelId,
+                            name: channel.name,
+                            description: channel.description,
+                            creator: channel.creator,
+                            subscribers: channel.subscribers || [],
+                            createdAt: channel.createdAt
+                        });
+                    });
+                }
+                
+                displayChannels();
+            } catch (error) {
+                console.error('Ошибка загрузки каналов:', error);
+            }
+        }
+        
+        function displayChannels() {
+            searchResults.innerHTML = '';
+            
+            if (channels.length === 0) {
+                searchResults.innerHTML = '<div class="user-item">Каналы не найдены</div>';
+                return;
+            }
+            
+            channels.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+                
+                const isSubscribed = subscribedChannels.includes(channel.id);
+                
+                channelItem.innerHTML = `
+                    <div class="channel-icon">📢</div>
+                    <div class="channel-info">
+                        <h3>${channel.name}</h3>
+                        <p>${channel.description || 'Нет описания'}</p>
+                        <div class="channel-subscribers">
+                            <span>👤 ${channel.subscribers ? channel.subscribers.length : 0}</span>
+                        </div>
+                    </div>
+                    <button class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" data-channel-id="${channel.id}">
+                        ${isSubscribed ? 'Отписаться' : 'Подписаться'}
+                    </button>
+                `;
+                
+                // Обработчик подписки/отписки
+                const subscribeBtn = channelItem.querySelector('.subscribe-btn');
+                subscribeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleSubscribe(channel.id);
+                });
+                
+                // Обработчик открытия канала
+                channelItem.addEventListener('click', () => {
+                    if (isSubscribed) {
+                        openChannelChat(channel.id, channel.name);
+                    } else {
+                        showNotification('Подпишитесь на канал, чтобы просматривать сообщения');
+                    }
+                });
+                
+                searchResults.appendChild(channelItem);
+            });
+        }
+        
+        async function toggleSubscribe(channelId) {
+            try {
+                const isSubscribed = subscribedChannels.includes(channelId);
+                
+                if (isSubscribed) {
+                    // Отписка
+                    subscribedChannels = subscribedChannels.filter(id => id !== channelId);
+                    showNotification('Вы отписались от канала');
+                } else {
+                    // Подписка
+                    subscribedChannels.push(channelId);
+                    showNotification('Вы подписались на канал');
+                }
+                
+                // Обновляем данные пользователя
+                await updateSubscribedChannels();
+                
+                // Обновляем данные канала
+                const channel = channels.find(c => c.id === channelId);
+                if (channel) {
+                    if (isSubscribed) {
+                        channel.subscribers = channel.subscribers.filter(sub => sub !== currentUser);
+                    } else {
+                        if (!channel.subscribers) {
+                            channel.subscribers = [];
+                        }
+                        channel.subscribers.push(currentUser);
+                    }
+                    
+                    await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            subscribers: channel.subscribers
+                        })
+                    });
+                }
+                
+                // Обновляем отображение
+                if (activeTab === 'channels') {
+                    loadChannels();
+                } else if (activeTab === 'chats') {
+                    loadRecentChats();
+                }
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function updateSubscribedChannels() {
+            try {
+                await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        subscribedChannels: subscribedChannels
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка обновления подписанных каналов:', error);
+            }
+        }
+        
+        async function loadSubscribedChannels() {
+            try {
+                const response = await fetch(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных пользователя');
+                
+                const userData = await response.json();
+                if (userData && userData.subscribedChannels) {
+                    subscribedChannels = userData.subscribedChannels;
+                } else {
+                    subscribedChannels = [];
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки подписанных каналов:', error);
+                subscribedChannels = [];
+            }
+        }
+        
+        async function unsubscribeFromChannel(channelId) {
+            subscribedChannels = subscribedChannels.filter(id => id !== channelId);
+            await updateSubscribedChannels();
+            
+            // Обновляем данные канала
+            const channel = channels.find(c => c.id === channelId);
+            if (channel) {
+                channel.subscribers = channel.subscribers.filter(sub => sub !== currentUser);
+                
+                await fetch(`${firebaseURL}channels/${channelId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        subscribers: channel.subscribers
+                    })
+                });
+            }
+        }
+        
+        function openChannelChat(channelId, channelName) {
+            // Закрываем сайдбар на мобильных
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                mobileTitle.textContent = channelName;
+            }
+            
+            // Очищаем предыдущие слушатели
+            if (currentChat && messageListeners[currentChat]) {
+                clearInterval(messageListeners[currentChat]);
+            }
+            
+            currentChat = channelId;
+            currentChatType = 'channel';
+            currentChannel = channels.find(c => c.id === channelId);
+            currentGroup = null;
+            emptyState.style.display = 'none';
+            chatHeader.style.display = 'flex';
+            chatMessages.style.display = 'block';
+            
+            // Показываем поле ввода только если пользователь - создатель канала
+            if (currentChannel && currentChannel.creator === currentUser) {
+                messageInputContainer.style.display = 'flex';
+            } else {
+                messageInputContainer.style.display = 'none';
+            }
+            
+            // Обновляем имя канала
+            chatUserEmoji.textContent = '📢';
+            chatUserName.querySelector('span:last-child').textContent = channelName;
+            chatAvatar.textContent = '📢';
+            
+            // Скрываем кнопку блокировки для каналов
+            blockUserBtn.style.display = 'none';
+            groupSettingsBtn.style.display = 'none';
+            
+            // Показываем кнопку настроек канала, если пользователь является создателем
+            if (currentChannel && currentChannel.creator === currentUser) {
+                channelSettingsBtn.style.display = 'block';
+            } else {
+                channelSettingsBtn.style.display = 'none';
+            }
+            
+            // Настройка поля ввода для мобильных
+            adjustMessageInput();
+            
+            loadMessages();
+            
+            // Устанавливаем периодическую проверку новых сообщений
+            messageListeners[channelId] = setInterval(() => {
+                loadMessages();
+            }, 3000);
+        }
+        
+        async function openChannelSettings() {
+            if (!currentChannel) return;
+            
+            editChannelNameInput.value = currentChannel.name;
+            editChannelDescriptionInput.value = currentChannel.description || '';
+            
+            channelSettingsModal.classList.add('active');
+        }
+        
+        function closeChannelSettings() {
+            channelSettingsModal.classList.remove('active');
+        }
+        
+        async function saveChannelSettings() {
+            if (!currentChannel) return;
+            
+            const newName = editChannelNameInput.value.trim();
+            const newDescription = editChannelDescriptionInput.value.trim();
+            
+            if (!newName) {
+                showNotification('Пожалуйста, введите название канала');
+                return;
+            }
+            
+            try {
+                // Обновляем данные канала
+                await fetch(`${firebaseURL}channels/${currentChannel.id}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        name: newName,
+                        description: newDescription
+                    })
+                });
+                
+                // Обновляем текущий канал
+                currentChannel.name = newName;
+                currentChannel.description = newDescription;
+                
+                // Обновляем заголовок чата
+                chatUserName.querySelector('span:last-child').textContent = newName;
+                
+                showNotification('Настройки канала сохранены');
+                closeChannelSettings();
+                
+                // Обновляем список каналов
+                loadChannels();
+            } catch (error) {
+                showNotification('Ошибка: ' + error.message);
+            }
+        }
+        
+        async function unsubscribeChannel() {
+            if (!currentChannel) return;
+            
+            if (confirm('Вы уверены, что хотите отписаться от этого канала?')) {
+                try {
+                    await unsubscribeFromChannel(currentChannel.id);
+                    
+                    showNotification('Вы отписались от канала');
+                    closeChannelSettings();
+                    closeChat();
+                    
+                    // Обновляем список каналов
+                    loadChannels();
+                } catch (error) {
+                    showNotification('Ошибка: ' + error.message);
+                }
+            }
+        }
+        
+        // Обработка закрытия вкладки/приложения
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                // Отправляем запрос на обновление статуса
+                navigator.sendBeacon(`${firebaseURL}users/${encodeURIComponent(currentUser)}.json`, 
+                    JSON.stringify({ online: false, lastSeen: Date.now() }));
+            }
+        });
+    </script>
+</body>
+</html>
+
+n: Date.now() }));
+            }
+        });
+    </script>
+</body>
+</html>
+
+lse, lastSeen: Date.now() }));
+            }
+        });
+    </script>
+</body>
+</html>
+
+   });
+    </script>
+</body>
+</html>
+
