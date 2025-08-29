@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height">
+    <meta name="viewport"
+ 
+
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height">
     <title>Twin</title>
     <style>
         :root {
@@ -1428,11 +1431,44 @@
         
         // Инициализация
         document.addEventListener('DOMContentLoaded', initApp);
+        // Проверка видимости страницы
+function isPageVisible() {
+    return !document.hidden;
+}
+
+// Обработчик изменения видимости
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('Страница скрыта');
+    } else {
+        console.log('Страница видима');
+    }
+});
+        
         
         async function initApp() {
             setupEventListeners();
             setupNetworkStatus();
             
+            // Регистрация Service Worker для уведомлений
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+            console.log('Service Worker зарегистрирован:', registration);
+        })
+        .catch(function(error) {
+            console.log('Ошибка регистрации Service Worker:', error);
+        });
+}
+// Обработка фокуса окна
+window.addEventListener('focus', function() {
+    console.log('Окно в фокусе');
+    lastMessageTimestamp = Date.now(); // Сбрасываем timestamp при фокусе
+});
+
+window.addEventListener('blur', function() {
+    console.log('Окно не в фокусе');
+});
             // Проверяем сохраненную тему
             if (localStorage.getItem('dark_theme') === 'true') {
                 document.body.classList.add('dark-theme');
@@ -1810,8 +1846,10 @@ document.addEventListener('click', (e) => {
                             .filter(msg => msg.text && msg.sender && msg.timestamp)
                             .sort((a, b) => b.timestamp - a.timestamp)[0];
                         
-                        if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
-                            latestMessage.sender !== currentUser && document.hidden) {
+if (latestMessage && latestMessage.timestamp > lastMessageTimestamp && 
+    latestMessage.sender !== currentUser && !isPageVisible()) {
+    // Показывать уведомление
+    }                          
                             
                             // Определяем имя отправителя
                             let senderName = latestMessage.sender;
@@ -1828,13 +1866,15 @@ document.addEventListener('click', (e) => {
                             }
                             
                             // Показываем уведомление
-                            showNotification(`Новое сообщение от ${senderName}: ${truncate(latestMessage.text, 30)}`);
+                            // Стало:
+showNotification(`Новое сообщение от ${senderName}: ${truncate(latestMessage.text, 30)}`, `Новое сообщение от ${senderName}`); 
+                            
                             playNotificationSound();
                             
                             // Обновляем время последнего сообщения
                             lastMessageTimestamp = latestMessage.timestamp;
                         }
-                    }
+                    
                 });
             } catch (error) {
                 console.error('Ошибка при проверке новых сообщений:', error);
@@ -3769,15 +3809,57 @@ async function loadMessages() {
             }
         }
         
-        function showNotification(message) {
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+        function showNotification(message, title = 'Twin Messenger') {
+    // Показываем стандартное уведомление в интерфейсе
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+    
+    // Показываем браузерное уведомление
+    showBrowserNotification(title, message);
+}
+
+async function showBrowserNotification(title, message) {
+    // Проверяем поддержку уведомлений
+    if (!('Notification' in window)) {
+        console.log('Браузер не поддерживает уведомления');
+        return;
+    }
+    
+    // Проверяем разрешение
+    if (Notification.permission === 'default') {
+        // Запрашиваем разрешение
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            return;
         }
+    }
+    
+    if (Notification.permission === 'granted') {
+        // Создаем уведомление
+        const notification = new Notification(title, {
+            body: message,
+            icon: '/icon-192x192.png', // Укажите путь к иконке
+            tag: 'twin-messenger',
+            requireInteraction: false
+        });
         
+        // Закрываем уведомление через 4 секунды
+        setTimeout(() => {
+            notification.close();
+        }, 4000);
+        
+        // Обработчик клика по уведомлению
+        notification.onclick = function() {
+            window.focus();
+            this.close();
+        };
+    }
+}
+       
         function debounce(func, wait) {
             let timeout;
             return function() {
